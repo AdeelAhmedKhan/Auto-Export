@@ -26,7 +26,7 @@ function SidebarPanel({
   children: ReactNode;
 }) {
   return (
-    <section className="overflow-hidden rounded-[1.5rem] border border-[#d7dfef] bg-white shadow-[0_16px_40px_rgba(15,23,42,0.06)]">
+    <section className="overflow-hidden border border-[#d7dfef] bg-white shadow-[0_16px_40px_rgba(15,23,42,0.06)]">
       <div className="bg-[linear-gradient(135deg,#102a66_0%,#0c47a5_100%)] px-4 py-3">
         <h2 className="text-sm font-bold uppercase tracking-[0.18em] text-white">{title}</h2>
       </div>
@@ -47,21 +47,21 @@ function SidebarVehicleCard({
   return (
     <Link
       href={`/car/${vehicle.id}`}
-      className="group flex gap-3 rounded-2xl border border-[#e2e8f0] bg-white p-3 transition-colors hover:border-[#0c47a5] hover:bg-[#f8fbff]"
+      className="group block border border-[#e2e8f0] bg-white p-3 transition-colors hover:border-[#0c47a5] hover:bg-[#f8fbff]"
     >
-      <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-xl bg-[#e5e7eb]">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#e5e7eb]">
         <Image
           src={vehicle.thumbnail || "/placeholder-car.svg"}
           alt={vehicle.title}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-[1.04]"
-          sizes="112px"
+          sizes="300px"
         />
       </div>
-      <div className="min-w-0">
+      <div className="min-w-0 pt-2">
         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#0c47a5]">{title}</p>
         <h3 className="mt-1 line-clamp-2 text-sm font-semibold text-[#111827]">{vehicle.title}</h3>
-        <p className="mt-2 text-sm font-bold text-[#0c47a5]">{formatUsd(price)}</p>
+        <p className="mt-1 text-sm font-bold text-[#0c47a5]">{formatUsd(price)}</p>
         <p className="mt-1 text-xs text-[#64748b]">
           {vehicle.year} {vehicle.transmission ? `• ${vehicle.transmission}` : ""}
         </p>
@@ -110,9 +110,10 @@ export async function VehicleListingSection({
   searchParams: Record<string, string | string[] | undefined>;
 }) {
   const parsed = parseVehicleSearchParams(searchParams);
+  const isStockLookup = Boolean(parsed.stockNumber?.trim());
   const merged: VehicleSearchParams = {
     ...parsed,
-    ...baseParams,
+    ...(isStockLookup ? {} : baseParams),
     page: parsed.page ?? 1,
     perPage: 20,
   };
@@ -299,7 +300,7 @@ export async function VehicleListingSection({
                     type="text"
                     name="stock"
                     defaultValue={merged.stockNumber ?? ""}
-                    placeholder="Search by stock ID"
+                    placeholder="Search by Stock ID"
                     className="h-12 rounded-xl border border-[#d8dee9] bg-[#f8fbff] px-4 text-sm text-[#111827] outline-none focus:border-[#0c47a5]"
                   />
                   <button

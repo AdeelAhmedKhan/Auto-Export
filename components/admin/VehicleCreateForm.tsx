@@ -215,12 +215,18 @@ export function VehicleCreateForm({
         <h2 className="text-lg font-semibold text-[#0a0a0a]">Basic details</h2>
         <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <label className="text-sm font-medium text-[#374151]">
-            Stock number
+            Stock ID
             <input
               name="stockNumber"
               defaultValue={initialValues?.stockNumber ?? ""}
-              className="mt-1 w-full rounded-lg border border-[#dbe3f2] px-3 py-2.5"
+              readOnly={mode === "create"}
+              className="mt-1 w-full rounded-lg border border-[#dbe3f2] px-3 py-2.5 read-only:bg-[#f8fafc] read-only:text-[#64748b]"
             />
+            <span className="mt-1 block text-xs text-[#6b7280]">
+              {mode === "create"
+                ? "Auto-generated from the vehicle primary ID when saved."
+                : "Unique searchable Stock ID for this vehicle."}
+            </span>
           </label>
           <label className="text-sm font-medium text-[#374151]">
             Location

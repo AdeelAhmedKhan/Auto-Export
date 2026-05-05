@@ -67,7 +67,7 @@ export default async function AdminVehiclesPage() {
           <thead className="border-b border-[#e0e0e0] bg-[#f5f5f5]">
             <tr>
               <th className="p-3">Thumb</th>
-              <th className="p-3">Stock</th>
+              <th className="p-3">Stock ID</th>
               <th className="p-3">Title</th>
               <th className="p-3">Year</th>
               <th className="p-3">Price</th>

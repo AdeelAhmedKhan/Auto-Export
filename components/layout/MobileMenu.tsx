@@ -94,8 +94,8 @@ export function MobileMenu({
                 id="mobile-stock-search"
                 type="text"
                 name="stock"
-                placeholder="Enter stock ID"
-                className="min-w-0 flex-1 rounded-xl border border-white/15 bg-white/12 px-3 py-3 text-sm text-white placeholder:text-white/58 outline-none focus:border-white/40"
+                placeholder="Enter Stock ID"
+                className="min-w-0 flex-1 rounded-xl border border-white/15 bg-white px-3 py-3 text-sm text-[#111827] placeholder:text-[#6b7280] caret-[#111827] outline-none focus:border-white/40"
               />
               <button
                 type="submit"

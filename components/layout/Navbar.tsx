@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { MobileMenu } from "./MobileMenu";
 import { priceFilterLinks, quickFilterLinks } from "@/lib/inventory-links";
 import type { SidebarFacetItem } from "@/lib/queries/vehicles";
@@ -31,6 +31,20 @@ export function Navbar({
   steering = [],
 }: NavbarProps) {
   const [open, setOpen] = useState<string | null>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const openMenu = (key: string) => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+    setOpen(key);
+  };
+  const closeMenu = () => {
+    closeTimer.current = setTimeout(() => {
+      setOpen(null);
+      closeTimer.current = null;
+    }, 220);
+  };
   const mega = [
     {
       title: "By Make",
@@ -75,8 +89,10 @@ export function Navbar({
         <div className="hidden items-center gap-1 lg:flex">
           <div
             className="relative"
-            onMouseEnter={() => setOpen("used")}
-            onMouseLeave={() => setOpen(null)}
+            onMouseEnter={() => openMenu("used")}
+            onMouseLeave={closeMenu}
+            onFocus={() => openMenu("used")}
+            onBlur={closeMenu}
           >
             <button
               type="button"
@@ -88,23 +104,25 @@ export function Navbar({
               Used Cars
             </button>
             {open === "used" && (
-              <div className="absolute left-0 top-full z-50 mt-1 grid min-w-[760px] grid-cols-4 gap-6 rounded-xl border border-[#e0e0e0] bg-white p-6 text-[#0a0a0a] shadow-xl">
-                {mega.map((col) => (
-                  <div key={col.title} className="min-w-[140px]">
-                    <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#6b7280]">
-                      {col.title}
+              <div className="absolute left-0 top-full z-50 min-w-[760px] pt-3">
+                <div className="grid grid-cols-4 gap-6 rounded-xl border border-[#e0e0e0] bg-white p-6 text-[#0a0a0a] shadow-xl">
+                  {mega.map((col) => (
+                    <div key={col.title} className="min-w-[140px]">
+                      <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#6b7280]">
+                        {col.title}
+                      </div>
+                      <ul className="space-y-1">
+                        {col.children.map((item) => (
+                          <li key={`${col.title}-${item.href}`}>
+                            <Link href={item.href} className="text-sm hover:text-[#0c47a5]">
+                              {item.label}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <ul className="space-y-1">
-                      {col.children.map((item) => (
-                        <li key={`${col.title}-${item.href}`}>
-                          <Link href={item.href} className="text-sm hover:text-[#0c47a5]">
-                            {item.label}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -136,6 +154,20 @@ export function Navbar({
         </div>
 
         <div className="hidden items-center gap-3 md:flex">
+          <form action="/search" method="get" className="hidden items-center gap-2 xl:flex">
+            <input
+              type="text"
+              name="stock"
+              placeholder="Search Stock ID"
+              className="h-11 w-[180px] rounded-xl border border-white/20 bg-white px-4 text-sm text-[#111827] placeholder:text-[#64748b] outline-none ring-0 focus:border-white/50"
+            />
+            <button
+              type="submit"
+              className="rounded-xl border border-white/20 bg-white/12 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/18"
+            >
+              Search
+            </button>
+          </form>
           <span className="text-sm opacity-90">{phone}</span>
         </div>
 

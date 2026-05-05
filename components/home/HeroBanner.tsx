@@ -19,10 +19,10 @@ export async function HeroBanner({ imageUrl }: { imageUrl?: string | null }) {
         alt="Hero"
         fill
         priority
-        className="object-cover brightness-[0.85]"
+        className="object-cover"
         sizes="100vw"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/20" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/28 via-transparent to-transparent" />
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-4 text-white sm:py-5 lg:py-6">
         <div className="grid items-start gap-3 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:gap-5">
           <div className="max-w-3xl self-center">

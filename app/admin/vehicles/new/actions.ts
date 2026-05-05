@@ -15,7 +15,6 @@ import {
 import type { VehicleCreateState } from "@/components/admin/VehicleCreateForm";
 
 const schema = z.object({
-  stockNumber: z.string().trim().max(50).optional(),
   location: z.string().trim().max(100).optional(),
   title: z.string().trim().min(3).max(255),
   makeId: z.coerce.number().int().positive(),
@@ -105,7 +104,6 @@ export async function createVehicleAction(
   }
 
   const parsed = schema.safeParse({
-    stockNumber: getString(formData, "stockNumber"),
     location: getString(formData, "location"),
     title: getString(formData, "title"),
     makeId: formData.get("makeId"),
@@ -170,18 +168,6 @@ export async function createVehicleAction(
     return { error: "Selected body type was not found." };
   }
 
-  if (data.stockNumber) {
-    const [existingStock] = await db
-      .select({ id: vehicles.id })
-      .from(vehicles)
-      .where(eq(vehicles.stockNumber, data.stockNumber))
-      .limit(1);
-
-    if (existingStock) {
-      return { error: `Stock number "${data.stockNumber}" already exists. Please use a unique stock number.` };
-    }
-  }
-
   const imageUrls = [data.primaryImageUrl, ...splitLines(data.additionalImageUrls ?? "")]
     .filter((url, index, arr) => arr.indexOf(url) === index);
   const features = splitLines(data.featuresText ?? "")
@@ -192,7 +178,7 @@ export async function createVehicleAction(
       const inserted = await tx
         .insert(vehicles)
         .values({
-          stockNumber: data.stockNumber || null,
+          stockNumber: null,
           location: data.location || null,
           makeId: data.makeId,
           modelId: data.modelId,
@@ -231,6 +217,14 @@ export async function createVehicleAction(
         throw new Error("Vehicle could not be created.");
       }
 
+      await tx
+        .update(vehicles)
+        .set({
+          stockNumber: String(newVehicleId),
+          updatedAt: new Date(),
+        })
+        .where(eq(vehicles.id, newVehicleId));
+
       if (imageUrls.length > 0) {
         await tx.insert(vehicleImages).values(
           imageUrls.map((url, index) => ({
@@ -260,7 +254,7 @@ export async function createVehicleAction(
       return {
         error:
           pgError.detail ??
-          "This stock number already exists. Please use a unique stock number.",
+          "This Stock ID already exists. Please try saving again.",
       };
     }
 

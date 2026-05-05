@@ -10,7 +10,7 @@ export function VehicleGrid({ vehicles }: { vehicles: VehicleListItem[] }) {
     );
   }
   return (
-    <div className="grid grid-cols-3 gap-2.5 sm:gap-4 lg:grid-cols-5">
+    <div className="grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-5">
       {vehicles.map((v) => (
         <VehicleCard key={v.id} vehicle={v} />
       ))}

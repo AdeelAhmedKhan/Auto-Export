@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { asc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import { VehicleCreateForm } from "@/components/admin/VehicleCreateForm";
 import { createVehicleAction } from "./actions";
 import { db } from "@/lib/db";
-import { bodyTypes, makes, models } from "@/lib/db/schema";
+import { bodyTypes, makes, models, vehicles } from "@/lib/db/schema";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +11,7 @@ export default async function NewVehiclePage() {
   let makeOptions: { id: number; name: string }[] = [];
   let modelOptions: { id: number; name: string; makeId: number }[] = [];
   let bodyTypeOptions: { id: number; name: string }[] = [];
+  let nextStockNumber = "1";
 
   try {
     if (!db) throw new Error("no db");
@@ -30,10 +31,19 @@ export default async function NewVehiclePage() {
       .select({ id: bodyTypes.id, name: bodyTypes.name })
       .from(bodyTypes)
       .orderBy(asc(bodyTypes.name));
+
+    const [latestVehicle] = await db
+      .select({ id: vehicles.id })
+      .from(vehicles)
+      .orderBy(desc(vehicles.id))
+      .limit(1);
+
+    nextStockNumber = String((latestVehicle?.id ?? 0) + 1);
   } catch {
     makeOptions = [];
     modelOptions = [];
     bodyTypeOptions = [];
+    nextStockNumber = "1";
   }
 
   if (makeOptions.length === 0 || modelOptions.length === 0 || bodyTypeOptions.length === 0) {
@@ -72,6 +82,7 @@ export default async function NewVehiclePage() {
         makes={makeOptions}
         models={modelOptions}
         bodyTypes={bodyTypeOptions}
+        initialValues={{ stockNumber: nextStockNumber }}
       />
     </div>
   );

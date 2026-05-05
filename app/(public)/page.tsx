@@ -10,7 +10,7 @@ import {
   listBodyTypes,
 } from "@/lib/queries/makes";
 import { getSiteSetting } from "@/lib/queries/site";
-import { priceFilterLinks, quickFilterLinks } from "@/lib/inventory-links";
+import { priceFilterLinks } from "@/lib/inventory-links";
 import Image from "next/image";
 
 export const revalidate = 120;
@@ -51,6 +51,28 @@ const aboutFeatures = [
   },
 ];
 
+function priceSearchParamsFromHref(href: string) {
+  const byPriceMatch = href.match(/^\/by-price\/(\d+)\/(\d+)$/);
+  if (byPriceMatch) {
+    return {
+      minPrice: Number(byPriceMatch[1]),
+      maxPrice: Number(byPriceMatch[2]),
+    };
+  }
+
+  const underMatch = href.match(/^\/price-under\/(\d+)$/);
+  if (underMatch) {
+    return { maxPrice: Number(underMatch[1]) };
+  }
+
+  const overMatch = href.match(/^\/price-over\/(\d+)$/);
+  if (overMatch) {
+    return { minPrice: Number(overMatch[1]) };
+  }
+
+  return {};
+}
+
 function HomeSidebarSection({
   title,
   children,
@@ -59,7 +81,7 @@ function HomeSidebarSection({
   children: ReactNode;
 }) {
   return (
-    <section className="overflow-hidden rounded-[1.5rem] border border-[#d7dfef] bg-white shadow-[0_16px_40px_rgba(15,23,42,0.06)]">
+    <section className="overflow-hidden border border-[#d7dfef] bg-white shadow-[0_16px_40px_rgba(15,23,42,0.06)]">
       <div className="bg-[linear-gradient(135deg,#102a66_0%,#0c47a5_100%)] px-4 py-3">
         <h2 className="text-sm font-bold uppercase tracking-[0.18em] text-white">{title}</h2>
       </div>
@@ -76,6 +98,7 @@ function HomeCategoryCard({
   imageUrl,
   accent,
   badge,
+  compact = false,
 }: {
   href: string;
   title: string;
@@ -84,13 +107,14 @@ function HomeCategoryCard({
   imageUrl?: string | null;
   accent: string;
   badge: string;
+  compact?: boolean;
 }) {
   return (
     <Link
       href={href}
-      className="group overflow-hidden rounded-[1.5rem] border border-[#d9e2f0] bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
+      className="group overflow-hidden rounded-lg border border-[#d9e2f0] bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
     >
-      <div className="relative aspect-[1/1] overflow-hidden bg-[#e8eef9] sm:aspect-[4/3]">
+      <div className={`relative overflow-hidden bg-[#e8eef9] ${compact ? "aspect-[4/3]" : "aspect-square"}`}>
         <Image
           src={imageUrl || "/placeholder-car.svg"}
           alt={title}
@@ -99,13 +123,23 @@ function HomeCategoryCard({
           sizes="(max-width: 640px) 50vw, (max-width: 1200px) 50vw, 25vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a]/82 via-[#0f172a]/18 to-transparent" />
-        <div className={`absolute left-3 top-3 border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] sm:left-4 sm:top-4 sm:px-3 ${accent}`}>
+        <div
+          className={`absolute left-2 top-2 border px-2 py-0.5 text-[8px] font-bold uppercase ${
+            compact ? "sm:text-[8px]" : "sm:text-[9px]"
+          } ${accent}`}
+        >
           {badge}
         </div>
-        <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/75">{countLabel}</p>
-          <h3 className="mt-1.5 text-base font-bold leading-tight text-white sm:mt-2 sm:text-xl">{title}</h3>
-          <p className="mt-1 line-clamp-2 text-xs leading-5 text-white/82 sm:text-sm">{subtitle}</p>
+        <div className={`absolute bottom-2 left-2 right-2 ${compact ? "sm:bottom-2 sm:left-2.5 sm:right-2.5" : "sm:bottom-3 sm:left-3 sm:right-3"}`}>
+          <p className={`font-semibold uppercase text-white/75 ${compact ? "text-[8px] sm:text-[9px]" : "text-[9px] sm:text-[10px]"}`}>
+            {countLabel}
+          </p>
+          <h3 className={`mt-1 font-bold leading-tight text-white ${compact ? "text-xs sm:text-sm" : "text-sm sm:text-base"}`}>
+            {title}
+          </h3>
+          <p className={`mt-0.5 line-clamp-2 text-white/82 ${compact ? "text-[9px] leading-3 sm:text-[10px] sm:leading-4" : "text-[10px] leading-4 sm:text-xs"}`}>
+            {subtitle}
+          </p>
         </div>
       </div>
     </Link>
@@ -122,21 +156,21 @@ function HomeMiniVehicleCard({
   return (
     <Link
       href={`/car/${vehicle.id}`}
-      className="grid grid-cols-[84px_minmax(0,1fr)] gap-3 border-b border-[#e5e7eb] py-3 last:border-b-0 hover:bg-[#f8fbff] sm:grid-cols-[96px_minmax(0,1fr)]"
+      className="block border-b border-[#e5e7eb] px-1 py-3 last:border-b-0 hover:bg-[#f8fbff]"
     >
-      <div className="relative h-20 overflow-hidden rounded-xl border border-[#d8dee9] bg-[#e5e7eb]">
+      <div className="relative aspect-[4/3] w-full overflow-hidden border border-[#d8dee9] bg-[#e5e7eb]">
         <Image
           src={vehicle.thumbnail || "/placeholder-car.svg"}
           alt={vehicle.title}
           fill
           className="object-cover"
-          sizes="96px"
+          sizes="210px"
         />
       </div>
-      <div className="min-w-0">
+      <div className="min-w-0 pt-2">
         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#173574]">{badge}</p>
         <h3 className="mt-1 line-clamp-2 text-sm font-semibold text-[#111827]">{vehicle.title}</h3>
-        <p className="mt-2 text-xs text-[#64748b]">
+        <p className="mt-1 text-xs text-[#64748b]">
           {vehicle.year} {vehicle.transmission ? `| ${vehicle.transmission}` : ""}
         </p>
         <p className="mt-1 text-sm font-bold text-[#173574]">
@@ -169,7 +203,7 @@ export default async function HomePage() {
   let bodyTypeShowcase: Array<{
     id: number;
     name: string;
-    slug: string;
+    href: string;
     count: number;
     vehicle: Awaited<ReturnType<typeof searchVehicles>>["rows"][number] | null;
   }> = [];
@@ -199,7 +233,7 @@ export default async function HomePage() {
     sidebarData = await getVehicleSidebarData({}, { page: 1 });
     const featuredHighlightResult = await searchVehicles({
       page: 1,
-      perPage: 5,
+      perPage: 7,
       sort: "created_desc",
     });
     highlightedVehicles = [
@@ -207,7 +241,7 @@ export default async function HomePage() {
       ...featuredHighlightResult.rows.filter(
         (candidate) => !sidebarData.featuredVehicles.some((featured) => featured.id === candidate.id)
       ),
-    ].slice(0, 5);
+    ].slice(0, 7);
 
     makeShowcase = await Promise.all(
       sidebarData.makes.slice(0, 6).map(async (item) => {
@@ -228,34 +262,41 @@ export default async function HomePage() {
       })
     );
 
-    bodyTypeShowcase = await Promise.all(
-      sidebarData.bodyTypes.slice(0, 4).map(async (item) => {
+    const bodyTypeCounts = new Map(
+      sidebarData.bodyTypes.map((item) => [String(item.id), item.count])
+    );
+    const bodyTypeCards = await Promise.all(
+      bodyTypes.slice(0, 6).map(async (item) => {
         const vehicleResult = await searchVehicles({
-          bodyTypeId: Number(item.id),
+          bodyTypeId: item.id,
           page: 1,
           perPage: 1,
           sort: "created_desc",
         });
         return {
-          id: Number(item.id),
-          name: item.label,
-          slug: item.slug ?? "",
-          count: item.count,
+          id: item.id,
+          name: item.name,
+          href: item.slug ? `/car-type/${item.slug}` : "/search",
+          count: bodyTypeCounts.get(String(item.id)) ?? vehicleResult.total,
           vehicle: vehicleResult.rows[0] ?? null,
         };
       })
     );
+    const fallbackBodyCards = newArrivals
+      .filter((vehicle) => !bodyTypeCards.some((item) => item.vehicle?.id === vehicle.id))
+      .slice(0, Math.max(0, 6 - bodyTypeCards.length))
+      .map((vehicle) => ({
+        id: -vehicle.id,
+        name: vehicle.bodyTypeName || vehicle.title,
+        href: `/car/${vehicle.id}`,
+        count: 1,
+        vehicle,
+      }));
+    bodyTypeShowcase = [...bodyTypeCards, ...fallbackBodyCards].slice(0, 6);
 
     priceShowcase = await Promise.all(
       priceFilterLinks.map(async (item) => {
-        const searchParams =
-          item.href === "/price-under/8000"
-            ? { maxPrice: 8000 }
-            : item.href === "/by-price/8000/12000"
-              ? { minPrice: 8000, maxPrice: 12000 }
-              : item.href === "/by-price/12000/20000"
-                ? { minPrice: 12000, maxPrice: 20000 }
-                : { minPrice: 20000 };
+        const searchParams = priceSearchParamsFromHref(item.href);
         const vehicleResult = await searchVehicles({
           ...searchParams,
           page: 1,
@@ -279,7 +320,7 @@ export default async function HomePage() {
       <HeroBanner imageUrl={heroImage} />
 
       <section className="border-b border-[#d8dee9] bg-[#f8fbff] py-6 sm:py-8">
-        <div className="mx-auto max-w-[1600px] px-4">
+        <div className="mx-auto max-w-7xl px-4">
           <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#64748b]">
@@ -294,9 +335,9 @@ export default async function HomePage() {
               Browse all stock
             </Link>
           </div>
-          <div className="grid grid-cols-3 gap-2.5 sm:gap-4 lg:grid-cols-5">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-7">
             {highlightedVehicles.map((vehicle) => (
-              <VehicleCard key={`highlighted-${vehicle.id}`} vehicle={vehicle} />
+              <VehicleCard key={`highlighted-${vehicle.id}`} vehicle={vehicle} compact />
             ))}
           </div>
         </div>
@@ -340,23 +381,23 @@ export default async function HomePage() {
                       </p>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
-                      <div className="col-span-2 border border-white/20 bg-white/10 px-4 py-3 sm:col-span-1">
+                      <div className="flex min-h-[92px] flex-col justify-between border border-white/20 bg-white/10 px-4 py-3">
                         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/70">
                           Makes
                         </p>
-                        <p className="mt-1 text-2xl font-bold">{makes.length}</p>
+                        <p className="text-2xl font-bold leading-none">{makes.length}</p>
                       </div>
-                      <div className="border border-white/20 bg-white/10 px-4 py-3">
+                      <div className="flex min-h-[92px] flex-col justify-between border border-white/20 bg-white/10 px-4 py-3">
                         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/70">
                           Body types
                         </p>
-                        <p className="mt-1 text-2xl font-bold">{bodyTypes.length}</p>
+                        <p className="text-2xl font-bold leading-none">{bodyTypes.length}</p>
                       </div>
-                      <div className="border border-white/20 bg-white/10 px-4 py-3">
+                      <div className="flex min-h-[92px] flex-col justify-between border border-white/20 bg-white/10 px-4 py-3">
                         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/70">
                           Fresh units
                         </p>
-                        <p className="mt-1 text-2xl font-bold">{newArrivals.length}</p>
+                        <p className="text-2xl font-bold leading-none">{newArrivals.length}</p>
                       </div>
                     </div>
                   </div>
@@ -560,7 +601,7 @@ export default async function HomePage() {
       <section className="border-y border-[#e0e0e0] bg-[#f5f5f5] py-10 sm:py-14">
         <div className="mx-auto max-w-7xl px-4">
           <h2 className="mb-6 text-2xl font-bold text-[#0a0a0a] sm:mb-8">Shop by make</h2>
-          <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 xl:grid-cols-6">
             {makeShowcase.map((item) => (
               <div key={item.id} className="min-w-0">
                 <HomeCategoryCard
@@ -582,13 +623,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:py-14">
+      <section className="mx-auto max-w-7xl px-4 py-8 sm:py-10">
         <h2 className="mb-6 text-2xl font-bold text-[#0a0a0a] sm:mb-8">Shop by body type</h2>
-        <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 xl:grid-cols-6">
           {bodyTypeShowcase.map((item) => (
             <div key={item.id} className="min-w-0">
               <HomeCategoryCard
-                href={`/car-type/${item.slug}`}
+                href={item.href}
                 title={item.name}
                 subtitle={
                   item.vehicle
@@ -599,16 +640,17 @@ export default async function HomePage() {
                 imageUrl={item.vehicle?.thumbnail}
                 accent="border-[#93c5fd]/45 bg-[#0c47a5]/30 text-white"
                 badge="Body Type"
+                compact
               />
             </div>
           ))}
         </div>
       </section>
 
-      <section className="bg-[#f5f5f5] py-10 sm:py-14">
+      <section className="bg-[#f5f5f5] py-8 sm:py-10">
         <div className="mx-auto max-w-7xl px-4">
           <h2 className="mb-6 text-2xl font-bold text-[#0a0a0a] sm:mb-8">Shop by price</h2>
-          <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-4">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 xl:grid-cols-6">
             {priceShowcase.map((item) => (
               <div key={item.href} className="min-w-0">
                 <HomeCategoryCard
@@ -623,25 +665,11 @@ export default async function HomePage() {
                   imageUrl={item.vehicle?.thumbnail}
                   accent="border-[#fde68a]/45 bg-[#b45309]/35 text-white"
                   badge="Price"
+                  compact
                 />
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:py-14">
-        <h2 className="mb-6 text-2xl font-bold text-[#0a0a0a]">Quick categories</h2>
-        <div className="flex flex-wrap gap-2">
-          {quickFilterLinks.map((q) => (
-            <Link
-              key={q.href}
-              href={q.href}
-              className="shrink-0 rounded-full border border-[#e0e0e0] bg-white px-4 py-2 text-sm font-medium text-[#0a0a0a] hover:border-[#0c47a5] hover:text-[#0c47a5]"
-            >
-              {q.label}
-            </Link>
-          ))}
         </div>
       </section>
     </>

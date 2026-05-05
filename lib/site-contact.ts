@@ -5,6 +5,8 @@ export const SITE_CONTACT = {
   whatsapp: "66660202902",
   facebook:
     "https://www.facebook.com/people/9yard-Trading-Thailand/100086220451987/?rdid=hPaTYrYy4w8zBWAU&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F19KZMEgTEY%2F",
+  instagram: "https://www.instagram.com/9yardtrading?igsh=MWRlcmFycmtvbG8xZg==",
+  tiktok: "https://www.tiktok.com/@9yardtrading?_r=1&_t=ZS-95uiN02afm3",
   address:
     "193, Soi Samrong Nuea 21, Samrong Nuea sub-district, Mueang Samut Prakan district, Samut Prakan, 10270",
 } as const;

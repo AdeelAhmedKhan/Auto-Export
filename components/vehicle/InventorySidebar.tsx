@@ -15,7 +15,14 @@ function SidebarPanel({
   return (
     <section className="overflow-hidden border border-[#d7dfef] bg-white shadow-[0_16px_40px_rgba(15,23,42,0.06)]">
       <div className="bg-[linear-gradient(135deg,#102a66_0%,#0c47a5_100%)] px-4 py-3">
-        <h2 className="text-sm font-bold uppercase tracking-[0.18em] text-white">{title}</h2>
+        <div className="flex items-center gap-3">
+          <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/25 bg-white">
+            <Image src="/logo.png" alt="" fill className="object-contain p-1.5" sizes="32px" />
+          </span>
+          <h2 className="min-w-0 text-sm font-bold uppercase tracking-[0.18em] text-white">
+            {title}
+          </h2>
+        </div>
       </div>
       <div className="p-4">{children}</div>
     </section>
