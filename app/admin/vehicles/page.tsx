@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { vehicles, makes, models } from "@/lib/db/schema";
 import { desc, eq, asc } from "drizzle-orm";
 import { vehicleImages } from "@/lib/db/schema";
+import { DeleteVehicleButton } from "./DeleteVehicleButton";
 
 export const dynamic = "force-dynamic";
 
@@ -93,9 +94,12 @@ export default async function AdminVehiclesPage() {
                 <td className="p-3">{v.vehicleCondition}</td>
                 <td className="p-3">{v.isActive ? "Yes" : "No"}</td>
                 <td className="p-3">
-                  <Link href={`/admin/vehicles/${v.id}/edit`} className="text-[#0c47a5] hover:underline">
+                  <div className="flex items-center gap-3">
+                    <Link href={`/admin/vehicles/${v.id}/edit`} className="text-[#0c47a5] hover:underline">
                     Edit
-                  </Link>
+                    </Link>
+                    <DeleteVehicleButton vehicleId={v.id} title={v.title} />
+                  </div>
                 </td>
               </tr>
             ))}

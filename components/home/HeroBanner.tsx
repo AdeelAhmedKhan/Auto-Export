@@ -2,8 +2,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { listMakes, listBodyTypes } from "@/lib/queries/makes";
 
-export async function HeroBanner({ imageUrl }: { imageUrl?: string | null }) {
-  const bg = imageUrl || "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1920&q=80";
+export const DEFAULT_HERO_IMAGE =
+  "/hero-bg/hero-bg.jpg";
+
+export async function HeroBanner({
+  imageUrl,
+  showBackground = true,
+}: {
+  imageUrl?: string | null;
+  showBackground?: boolean;
+}) {
+  const bg = imageUrl || DEFAULT_HERO_IMAGE;
   const makes = await listMakes().catch(() => []);
   const bodyTypes = await listBodyTypes().catch(() => []);
   const quickLinks = [
@@ -14,25 +23,28 @@ export async function HeroBanner({ imageUrl }: { imageUrl?: string | null }) {
 
   return (
     <section className="relative w-full overflow-hidden">
-      <Image
-        src={bg}
-        alt="Hero"
-        fill
-        priority
-        className="object-cover"
-        sizes="100vw"
-      />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/28 via-transparent to-transparent" />
-      <div className="relative z-10 mx-auto max-w-7xl px-4 py-4 text-white sm:py-5 lg:py-6">
-        <div className="grid items-start gap-3 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:gap-5">
+      {showBackground ? (
+        <Image
+          src={bg}
+          alt="Parked export vehicles at a shipping port"
+          fill
+          priority
+          className="object-cover"
+          style={{ objectPosition: "left center" }}
+          sizes="100vw"
+        />
+      ) : null}
+      <div className="absolute inset-0 bg-gradient-to-r from-white/54 via-white/18 to-black/8" />
+      <div className="relative z-10 mx-auto max-w-7xl px-4 py-4 text-[#111827] sm:py-5 lg:py-6">
+        <div className="grid items-start gap-3 lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.9fr)] lg:gap-5">
           <div className="max-w-3xl self-center">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/75 sm:text-[11px]">
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#334155] sm:text-[11px]">
               Global Inventory Search
             </p>
             <h1 className="mt-1.5 text-xl font-bold tracking-tight sm:text-2xl md:text-3xl">
               Export-quality vehicles worldwide
             </h1>
-            <p className="mt-1.5 max-w-xl text-xs text-white/90 sm:text-sm">
+            <p className="mt-1.5 max-w-xl text-xs font-medium text-[#334155] sm:text-sm">
               Search live stock by make, body type, price, and more.
             </p>
             <div className="mt-2 hidden flex-wrap gap-2 sm:flex">
@@ -40,7 +52,7 @@ export async function HeroBanner({ imageUrl }: { imageUrl?: string | null }) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-xs font-medium text-white backdrop-blur hover:bg-white/15 sm:px-4 sm:py-2 sm:text-sm"
+                  className="rounded-full border border-[#0f172a]/15 bg-white/55 px-3.5 py-1.5 text-xs font-semibold text-[#111827] shadow-sm backdrop-blur hover:bg-white/75 sm:px-4 sm:py-2 sm:text-sm"
                 >
                   {link.label}
                 </Link>
@@ -51,7 +63,7 @@ export async function HeroBanner({ imageUrl }: { imageUrl?: string | null }) {
           <form
             action="/search"
             method="get"
-            className="rounded-2xl bg-white/95 p-3 text-[#0a0a0a] shadow-xl backdrop-blur sm:p-4"
+            className="rounded-2xl bg-white/95 p-3 text-[#0a0a0a] shadow-xl backdrop-blur sm:p-4 lg:max-w-[660px] lg:justify-self-end"
           >
             <div className="mb-2.5 flex items-start justify-between gap-3 border-b border-[#e5e7eb] pb-2.5">
               <div>

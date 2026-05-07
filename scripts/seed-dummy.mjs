@@ -281,7 +281,7 @@ async function main() {
         ('whatsapp', '66660202902'),
         ('email', 'info@9yardtrading.com'),
         ('address', '193, Soi Samrong Nuea 21, Samrong Nuea sub-district, Mueang Samut Prakan district, Samut Prakan, 10270'),
-        ('hero_banner_url', 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1920&q=80')
+        ('hero_banner_url', 'https://images.pexels.com/photos/29566901/pexels-photo-29566901.jpeg?auto=compress&cs=tinysrgb&w=1920')
       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW();
     `);
 

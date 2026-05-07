@@ -139,6 +139,8 @@ export default async function CarDetailPage({
             </section>
           ) : null}
 
+          <div id="quote" className="scroll-mt-28" />
+
           <section className="mt-12 lg:hidden">
             <QuoteForm vehicleId={v.id} whatsapp={whatsapp} />
           </section>

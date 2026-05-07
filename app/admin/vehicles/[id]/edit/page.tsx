@@ -15,6 +15,7 @@ import {
   vehicleImages,
   vehicles,
 } from "@/lib/db/schema";
+import { DeleteVehicleButton } from "../../DeleteVehicleButton";
 
 export const dynamic = "force-dynamic";
 
@@ -170,9 +171,12 @@ export default async function EditVehiclePage({ params }: { params: { id: string
             image selected as primary before saving.
           </p>
         </div>
-        <Link href="/admin/vehicles" className="text-sm font-semibold text-[#0c47a5] hover:underline">
-          Back to vehicles
-        </Link>
+        <div className="flex items-center gap-4">
+          <DeleteVehicleButton vehicleId={vehicleId} title={vehicle.title} />
+          <Link href="/admin/vehicles" className="text-sm font-semibold text-[#0c47a5] hover:underline">
+            Back to vehicles
+          </Link>
+        </div>
       </div>
 
       <VehicleCreateForm

@@ -1,15 +1,16 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { HeroBanner } from "@/components/home/HeroBanner";
+import { Suspense } from "react";
+import { DEFAULT_HERO_IMAGE, HeroBanner } from "@/components/home/HeroBanner";
 import { VehicleGrid } from "@/components/vehicle/VehicleGrid";
 import { VehicleCard } from "@/components/vehicle/VehicleCard";
 import { InventorySidebar } from "@/components/vehicle/InventorySidebar";
+import { ListingPagination } from "@/components/search/ListingPagination";
 import { getVehicleSidebarData, searchVehicles } from "@/lib/queries/vehicles";
 import {
   listMakes,
   listBodyTypes,
 } from "@/lib/queries/makes";
-import { getSiteSetting } from "@/lib/queries/site";
 import { priceFilterLinks } from "@/lib/inventory-links";
 import Image from "next/image";
 
@@ -51,27 +52,29 @@ const aboutFeatures = [
   },
 ];
 
-function priceSearchParamsFromHref(href: string) {
-  const byPriceMatch = href.match(/^\/by-price\/(\d+)\/(\d+)$/);
-  if (byPriceMatch) {
-    return {
-      minPrice: Number(byPriceMatch[1]),
-      maxPrice: Number(byPriceMatch[2]),
-    };
-  }
-
-  const underMatch = href.match(/^\/price-under\/(\d+)$/);
-  if (underMatch) {
-    return { maxPrice: Number(underMatch[1]) };
-  }
-
-  const overMatch = href.match(/^\/price-over\/(\d+)$/);
-  if (overMatch) {
-    return { minPrice: Number(overMatch[1]) };
-  }
-
-  return {};
-}
+const testimonials = [
+  {
+    name: "Ahmed Saleh",
+    location: "Dubai, UAE",
+    quote:
+      "The team handled my inquiry professionally from the first message. The vehicle details were clear, the inspection was honest, and shipment updates arrived on time.",
+    vehicle: "Toyota Land Cruiser",
+  },
+  {
+    name: "Grace Mwangi",
+    location: "Mombasa, Kenya",
+    quote:
+      "I appreciated how transparent the process felt. 9 Yard Trading helped me choose the right unit, explained the paperwork, and delivered exactly what was promised.",
+    vehicle: "Nissan Note",
+  },
+  {
+    name: "Marcus Johnson",
+    location: "Kingston, Jamaica",
+    quote:
+      "Professional service, fair pricing, and quick replies. The car arrived in very good condition and the export documents were prepared without delays.",
+    vehicle: "Honda Fit Hybrid",
+  },
+];
 
 function HomeSidebarSection({
   title,
@@ -82,67 +85,11 @@ function HomeSidebarSection({
 }) {
   return (
     <section className="overflow-hidden border border-[#d7dfef] bg-white shadow-[0_16px_40px_rgba(15,23,42,0.06)]">
-      <div className="bg-[linear-gradient(135deg,#102a66_0%,#0c47a5_100%)] px-4 py-3">
-        <h2 className="text-sm font-bold uppercase tracking-[0.18em] text-white">{title}</h2>
+      <div className="bg-[linear-gradient(135deg,#102a66_0%,#0c47a5_100%)] px-3 py-2.5 sm:px-4 sm:py-3">
+        <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-white sm:text-sm">{title}</h2>
       </div>
-      <div className="p-4">{children}</div>
+      <div className="p-3 sm:p-4">{children}</div>
     </section>
-  );
-}
-
-function HomeCategoryCard({
-  href,
-  title,
-  subtitle,
-  countLabel,
-  imageUrl,
-  accent,
-  badge,
-  compact = false,
-}: {
-  href: string;
-  title: string;
-  subtitle: string;
-  countLabel: string;
-  imageUrl?: string | null;
-  accent: string;
-  badge: string;
-  compact?: boolean;
-}) {
-  return (
-    <Link
-      href={href}
-      className="group overflow-hidden rounded-lg border border-[#d9e2f0] bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
-    >
-      <div className={`relative overflow-hidden bg-[#e8eef9] ${compact ? "aspect-[4/3]" : "aspect-square"}`}>
-        <Image
-          src={imageUrl || "/placeholder-car.svg"}
-          alt={title}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-          sizes="(max-width: 640px) 50vw, (max-width: 1200px) 50vw, 25vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a]/82 via-[#0f172a]/18 to-transparent" />
-        <div
-          className={`absolute left-2 top-2 border px-2 py-0.5 text-[8px] font-bold uppercase ${
-            compact ? "sm:text-[8px]" : "sm:text-[9px]"
-          } ${accent}`}
-        >
-          {badge}
-        </div>
-        <div className={`absolute bottom-2 left-2 right-2 ${compact ? "sm:bottom-2 sm:left-2.5 sm:right-2.5" : "sm:bottom-3 sm:left-3 sm:right-3"}`}>
-          <p className={`font-semibold uppercase text-white/75 ${compact ? "text-[8px] sm:text-[9px]" : "text-[9px] sm:text-[10px]"}`}>
-            {countLabel}
-          </p>
-          <h3 className={`mt-1 font-bold leading-tight text-white ${compact ? "text-xs sm:text-sm" : "text-sm sm:text-base"}`}>
-            {title}
-          </h3>
-          <p className={`mt-0.5 line-clamp-2 text-white/82 ${compact ? "text-[9px] leading-3 sm:text-[10px] sm:leading-4" : "text-[10px] leading-4 sm:text-xs"}`}>
-            {subtitle}
-          </p>
-        </div>
-      </div>
-    </Link>
   );
 }
 
@@ -156,24 +103,28 @@ function HomeMiniVehicleCard({
   return (
     <Link
       href={`/car/${vehicle.id}`}
-      className="block border-b border-[#e5e7eb] px-1 py-3 last:border-b-0 hover:bg-[#f8fbff]"
+      className="block overflow-hidden rounded-lg border border-[#d8dee9] bg-white shadow-sm transition-colors hover:bg-[#f8fbff] xl:rounded-none xl:border-x-0 xl:border-t-0 xl:px-1 xl:py-3 xl:shadow-none xl:last:border-b-0"
     >
-      <div className="relative aspect-[4/3] w-full overflow-hidden border border-[#d8dee9] bg-[#e5e7eb]">
+      <div className="relative aspect-[5/3] w-full overflow-hidden bg-[#e5e7eb] xl:aspect-[4/3] xl:border xl:border-[#d8dee9]">
         <Image
           src={vehicle.thumbnail || "/placeholder-car.svg"}
           alt={vehicle.title}
           fill
           className="object-cover"
-          sizes="210px"
+          sizes="(max-width: 1279px) 50vw, 210px"
         />
       </div>
-      <div className="min-w-0 pt-2">
-        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#173574]">{badge}</p>
-        <h3 className="mt-1 line-clamp-2 text-sm font-semibold text-[#111827]">{vehicle.title}</h3>
-        <p className="mt-1 text-xs text-[#64748b]">
+      <div className="min-w-0 p-2 xl:p-0 xl:pt-2">
+        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#173574] sm:text-[10px]">
+          {badge}
+        </p>
+        <h3 className="mt-1 line-clamp-2 text-xs font-semibold leading-4 text-[#111827] sm:text-sm sm:leading-5">
+          {vehicle.title}
+        </h3>
+        <p className="mt-1 truncate text-[10px] text-[#64748b] sm:text-xs">
           {vehicle.year} {vehicle.transmission ? `| ${vehicle.transmission}` : ""}
         </p>
-        <p className="mt-1 text-sm font-bold text-[#173574]">
+        <p className="mt-1 text-xs font-bold text-[#173574] sm:text-sm">
           ${Number(vehicle.price).toLocaleString("en-US")}
         </p>
       </div>
@@ -181,38 +132,20 @@ function HomeMiniVehicleCard({
   );
 }
 
-export default async function HomePage() {
-  let heroImage: string | null = null;
-  try {
-    heroImage = await getSiteSetting("hero_banner_url");
-  } catch {
-    heroImage = null;
-  }
-
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
+  const stockPageParam = Array.isArray(searchParams?.stock_page)
+    ? searchParams?.stock_page[0]
+    : searchParams?.stock_page;
+  const stockPage = Math.max(1, parseInt(stockPageParam ?? "1", 10) || 1);
+  const stockPerPage = 30;
   let newArrivals: Awaited<ReturnType<typeof searchVehicles>>["rows"] = [];
+  let newArrivalsTotal = 0;
   let makes: Awaited<ReturnType<typeof listMakes>> = [];
   let bodyTypes: Awaited<ReturnType<typeof listBodyTypes>> = [];
-  let makeShowcase: Array<{
-    id: number;
-    name: string;
-    slug: string;
-    logoUrl?: string | null;
-    count: number;
-    vehicle: Awaited<ReturnType<typeof searchVehicles>>["rows"][number] | null;
-  }> = [];
-  let bodyTypeShowcase: Array<{
-    id: number;
-    name: string;
-    href: string;
-    count: number;
-    vehicle: Awaited<ReturnType<typeof searchVehicles>>["rows"][number] | null;
-  }> = [];
-  let priceShowcase: Array<{
-    label: string;
-    href: string;
-    count: number;
-    vehicle: Awaited<ReturnType<typeof searchVehicles>>["rows"][number] | null;
-  }> = [];
   let sidebarData: Awaited<ReturnType<typeof getVehicleSidebarData>> = {
     makes: [],
     bodyTypes: [],
@@ -226,8 +159,9 @@ export default async function HomePage() {
   };
   let highlightedVehicles: Awaited<ReturnType<typeof searchVehicles>>["rows"] = [];
   try {
-    const na = await searchVehicles({ page: 1, perPage: 12, sort: "created_desc" });
+    const na = await searchVehicles({ page: stockPage, perPage: stockPerPage, sort: "created_desc" });
     newArrivals = na.rows;
+    newArrivalsTotal = na.total;
     makes = await listMakes();
     bodyTypes = await listBodyTypes();
     sidebarData = await getVehicleSidebarData({}, { page: 1 });
@@ -242,129 +176,73 @@ export default async function HomePage() {
         (candidate) => !sidebarData.featuredVehicles.some((featured) => featured.id === candidate.id)
       ),
     ].slice(0, 7);
-
-    makeShowcase = await Promise.all(
-      sidebarData.makes.slice(0, 6).map(async (item) => {
-        const vehicleResult = await searchVehicles({
-          makeId: Number(item.id),
-          page: 1,
-          perPage: 1,
-          sort: "created_desc",
-        });
-        return {
-          id: Number(item.id),
-          name: item.label,
-          slug: item.slug ?? "",
-          logoUrl: item.imageUrl,
-          count: item.count,
-          vehicle: vehicleResult.rows[0] ?? null,
-        };
-      })
-    );
-
-    const bodyTypeCounts = new Map(
-      sidebarData.bodyTypes.map((item) => [String(item.id), item.count])
-    );
-    const bodyTypeCards = await Promise.all(
-      bodyTypes.slice(0, 6).map(async (item) => {
-        const vehicleResult = await searchVehicles({
-          bodyTypeId: item.id,
-          page: 1,
-          perPage: 1,
-          sort: "created_desc",
-        });
-        return {
-          id: item.id,
-          name: item.name,
-          href: item.slug ? `/car-type/${item.slug}` : "/search",
-          count: bodyTypeCounts.get(String(item.id)) ?? vehicleResult.total,
-          vehicle: vehicleResult.rows[0] ?? null,
-        };
-      })
-    );
-    const fallbackBodyCards = newArrivals
-      .filter((vehicle) => !bodyTypeCards.some((item) => item.vehicle?.id === vehicle.id))
-      .slice(0, Math.max(0, 6 - bodyTypeCards.length))
-      .map((vehicle) => ({
-        id: -vehicle.id,
-        name: vehicle.bodyTypeName || vehicle.title,
-        href: `/car/${vehicle.id}`,
-        count: 1,
-        vehicle,
-      }));
-    bodyTypeShowcase = [...bodyTypeCards, ...fallbackBodyCards].slice(0, 6);
-
-    priceShowcase = await Promise.all(
-      priceFilterLinks.map(async (item) => {
-        const searchParams = priceSearchParamsFromHref(item.href);
-        const vehicleResult = await searchVehicles({
-          ...searchParams,
-          page: 1,
-          perPage: 1,
-          sort: "created_desc",
-        });
-        return {
-          label: item.label,
-          href: item.href,
-          count: vehicleResult.total,
-          vehicle: vehicleResult.rows[0] ?? null,
-        };
-      })
-    );
   } catch {
     /* no DB */
   }
 
+  const heroBackgroundImage = DEFAULT_HERO_IMAGE;
+  const stockTotalPages = Math.max(1, Math.ceil(newArrivalsTotal / stockPerPage));
+
   return (
     <>
-      <HeroBanner imageUrl={heroImage} />
+      <div
+        className="relative overflow-hidden bg-cover bg-left bg-no-repeat"
+        style={{
+          backgroundImage: `url(${heroBackgroundImage})`,
+          backgroundAttachment: "fixed",
+        }}
+      >
+        <HeroBanner imageUrl={heroBackgroundImage} showBackground={false} />
 
-      <section className="border-b border-[#d8dee9] bg-[#f8fbff] py-6 sm:py-8">
-        <div className="mx-auto max-w-7xl px-4">
-          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#64748b]">
-                Featured Stock
-              </p>
-              <h2 className="mt-1 text-2xl font-bold text-[#111827]">Highlighted vehicles</h2>
+        <section className="relative bg-[#0f172a]/52 py-6 text-white backdrop-blur-[1px] sm:py-8">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-[#0c47a5]/12 to-black/20" />
+          <div className="relative z-10 mx-auto max-w-7xl px-4">
+            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/70">
+                  Featured Stock
+                </p>
+                <h2 className="mt-1 text-2xl font-bold text-white">Highlighted vehicles</h2>
+              </div>
+              <Link
+                href="/search"
+                className="inline-flex min-h-[44px] items-center text-sm font-semibold text-white hover:underline"
+              >
+                Browse all stock
+              </Link>
             </div>
-            <Link
-              href="/search"
-              className="inline-flex min-h-[44px] items-center text-sm font-semibold text-[#173574] hover:underline"
-            >
-              Browse all stock
-            </Link>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-7">
+              {highlightedVehicles.map((vehicle) => (
+                <VehicleCard key={`highlighted-${vehicle.id}`} vehicle={vehicle} compact />
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-7">
-            {highlightedVehicles.map((vehicle) => (
-              <VehicleCard key={`highlighted-${vehicle.id}`} vehicle={vehicle} compact />
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       <section className="bg-[#eef1f6] py-8 sm:py-10">
         <div className="mx-auto max-w-[1600px] px-4">
           <div className="grid gap-5 xl:grid-cols-[210px_minmax(0,1fr)_210px]">
-            <InventorySidebar
-              className="order-1 hidden space-y-5 xl:col-span-1 xl:block xl:sticky xl:top-24 xl:self-start"
-              stats={[
-                { href: "/search", label: "Total stock", value: sidebarData.stats.total },
-                { href: "/search?new=1", label: "New arrivals", value: sidebarData.stats.newArrival },
-                { href: "/all-clearance", label: "Clearance", value: sidebarData.stats.clearance },
-                { href: "/search", label: "Featured", value: sidebarData.stats.featured },
-              ]}
-              makes={sidebarData.makes}
-              bodyTypes={sidebarData.bodyTypes}
-              fuelTypes={sidebarData.fuelTypes}
-              transmissions={sidebarData.transmissions}
-              steering={sidebarData.steering}
-              makeHref={(item) => `/brand/${item.slug}`}
-              bodyTypeHref={(item) => `/car-type/${item.slug}`}
-              fuelHref={(item) => `/search?fuel=${item.label}`}
-              transmissionHref={(item) => `/search?transmission=${item.label}`}
-              steeringHref={(item) => `/search?steering=${item.label}`}
-            />
+            <aside className="order-1 hidden space-y-5 xl:col-span-1 xl:block xl:sticky xl:top-24 xl:self-start">
+              <InventorySidebar
+                stats={[
+                  { href: "/search", label: "Total stock", value: sidebarData.stats.total },
+                  { href: "/search?new=1", label: "New arrivals", value: sidebarData.stats.newArrival },
+                  { href: "/all-clearance", label: "Clearance", value: sidebarData.stats.clearance },
+                  { href: "/search", label: "Featured", value: sidebarData.stats.featured },
+                ]}
+                makes={sidebarData.makes}
+                bodyTypes={sidebarData.bodyTypes}
+                fuelTypes={sidebarData.fuelTypes}
+                transmissions={sidebarData.transmissions}
+                steering={sidebarData.steering}
+                makeHref={(item) => `/brand/${item.slug}`}
+                bodyTypeHref={(item) => `/car-type/${item.slug}`}
+                fuelHref={(item) => `/search?fuel=${item.label}`}
+                transmissionHref={(item) => `/search?transmission=${item.label}`}
+                steeringHref={(item) => `/search?steering=${item.label}`}
+              />
+            </aside>
 
             <main className="order-2 min-w-0 lg:order-2 xl:order-2">
               <section className="overflow-hidden rounded-[1.75rem] border border-[#d8dee9] bg-white">
@@ -397,7 +275,7 @@ export default async function HomePage() {
                         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/70">
                           Fresh units
                         </p>
-                        <p className="text-2xl font-bold leading-none">{newArrivals.length}</p>
+                        <p className="text-2xl font-bold leading-none">{newArrivalsTotal}</p>
                       </div>
                     </div>
                   </div>
@@ -443,7 +321,7 @@ export default async function HomePage() {
                   </div>
                 </div>
 
-                <div className="px-4 py-5 sm:px-6 sm:py-6">
+                <div id="current-stock" className="scroll-mt-24 px-4 py-5 sm:px-6 sm:py-6">
                   <div className="mb-5 flex flex-col gap-3 border-b border-[#e5e7eb] pb-4 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
                     <div>
                       <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#64748b]">
@@ -459,13 +337,21 @@ export default async function HomePage() {
                     </Link>
                   </div>
                   <VehicleGrid vehicles={newArrivals} />
+                  <Suspense>
+                    <ListingPagination
+                      page={stockPage}
+                      totalPages={stockTotalPages}
+                      pageParam="stock_page"
+                      hash="current-stock"
+                    />
+                  </Suspense>
                 </div>
               </section>
             </main>
 
             <aside className="order-3 space-y-5 lg:order-3 lg:sticky lg:top-24 lg:self-start xl:order-3">
               <HomeSidebarSection title="Fresh Arrivals">
-                <div>
+                <div className="grid grid-cols-2 gap-2 xl:block">
                   {sidebarData.latestVehicles.map((vehicle) => (
                     <HomeMiniVehicleCard key={`latest-${vehicle.id}`} vehicle={vehicle} badge="New" />
                   ))}
@@ -473,7 +359,7 @@ export default async function HomePage() {
               </HomeSidebarSection>
 
               <HomeSidebarSection title="Clearance Stock">
-                <div>
+                <div className="grid grid-cols-2 gap-2 xl:block">
                   {(sidebarData.clearanceVehicles.length
                     ? sidebarData.clearanceVehicles
                     : sidebarData.latestVehicles
@@ -598,76 +484,87 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="border-y border-[#e0e0e0] bg-[#f5f5f5] py-10 sm:py-14">
-        <div className="mx-auto max-w-7xl px-4">
-          <h2 className="mb-6 text-2xl font-bold text-[#0a0a0a] sm:mb-8">Shop by make</h2>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 xl:grid-cols-6">
-            {makeShowcase.map((item) => (
-              <div key={item.id} className="min-w-0">
-                <HomeCategoryCard
-                  href={`/brand/${item.slug}`}
-                  title={item.name}
-                  subtitle={
-                    item.vehicle
-                      ? `${item.vehicle.year} ${item.vehicle.title}`
-                      : "Browse live inventory from this make."
-                  }
-                  countLabel={`${item.count} vehicles`}
-                  imageUrl={item.vehicle?.thumbnail || item.logoUrl}
-                  accent="border-white/25 bg-white/12 text-white"
-                  badge="Make"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:py-10">
-        <h2 className="mb-6 text-2xl font-bold text-[#0a0a0a] sm:mb-8">Shop by body type</h2>
-        <div className="grid grid-cols-3 gap-2 sm:gap-3 xl:grid-cols-6">
-          {bodyTypeShowcase.map((item) => (
-            <div key={item.id} className="min-w-0">
-              <HomeCategoryCard
-                href={item.href}
-                title={item.name}
-                subtitle={
-                  item.vehicle
-                    ? `${item.vehicle.makeName ?? ""} ${item.vehicle.modelName ?? item.vehicle.title}`.trim()
-                    : "See vehicles grouped by this body style."
-                }
-                countLabel={`${item.count} vehicles`}
-                imageUrl={item.vehicle?.thumbnail}
-                accent="border-[#93c5fd]/45 bg-[#0c47a5]/30 text-white"
-                badge="Body Type"
-                compact
-              />
+      <section className="overflow-hidden bg-[linear-gradient(135deg,#0f172a_0%,#173574_48%,#0c47a5_100%)] px-4 py-7 text-white sm:py-10">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-5 flex flex-col gap-3 sm:mb-7 sm:gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl">
+              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#bfdbfe]">
+                Client Testimonials
+              </p>
+              <h2 className="mt-2 text-xl font-bold text-white sm:text-3xl">
+                Trusted by buyers around the world
+              </h2>
+              <p className="mt-2 hidden max-w-2xl text-sm leading-6 text-white/72 sm:block">
+                Real confidence comes from clear communication, dependable vehicle details,
+                and export support that stays responsive from inquiry to shipment.
+              </p>
             </div>
-          ))}
-        </div>
-      </section>
+            <Link
+              href="/contact"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-white/20 bg-white px-5 text-sm font-semibold text-[#173574] shadow-sm transition-colors hover:bg-[#eef4ff]"
+            >
+              Share your inquiry
+            </Link>
+          </div>
 
-      <section className="bg-[#f5f5f5] py-8 sm:py-10">
-        <div className="mx-auto max-w-7xl px-4">
-          <h2 className="mb-6 text-2xl font-bold text-[#0a0a0a] sm:mb-8">Shop by price</h2>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 xl:grid-cols-6">
-            {priceShowcase.map((item) => (
-              <div key={item.href} className="min-w-0">
-                <HomeCategoryCard
-                  href={item.href}
-                  title={item.label}
-                  subtitle={
-                    item.vehicle
-                      ? `${item.vehicle.makeName ?? ""} ${item.vehicle.modelName ?? item.vehicle.title}`.trim()
-                      : "Explore vehicles in this budget range."
-                  }
-                  countLabel={item.count ? `${item.count} fresh matches` : "Browse this range"}
-                  imageUrl={item.vehicle?.thumbnail}
-                  accent="border-[#fde68a]/45 bg-[#b45309]/35 text-white"
-                  badge="Price"
-                  compact
-                />
-              </div>
+          <div className="snap-x snap-mandatory overflow-x-auto pb-3">
+            <div className="grid auto-cols-[86%] grid-flow-col gap-4 sm:auto-cols-[48%] lg:auto-cols-[32%]">
+            {testimonials.map((testimonial) => (
+              <article
+                key={`${testimonial.name}-${testimonial.location}`}
+                className="flex min-h-[210px] snap-start scroll-ml-4 flex-col justify-between rounded-2xl border border-white/15 bg-white/10 p-4 shadow-[0_24px_70px_rgba(0,0,0,0.22)] backdrop-blur sm:min-h-[245px] sm:p-5"
+              >
+                <div>
+                  <div className="mb-3 flex items-center justify-between gap-2 sm:mb-4 sm:gap-3">
+                    <div className="flex gap-1 text-[#f5b301]" aria-label="5 star review">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <svg
+                          key={star}
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          className="h-4 w-4 sm:h-5 sm:w-5"
+                        >
+                          <path d="M10 1.6l2.55 5.17 5.7.83-4.12 4.02.97 5.68L10 14.62 4.9 17.3l.97-5.68L1.75 7.6l5.7-.83L10 1.6z" />
+                        </svg>
+                      ))}
+                    </div>
+                    <span className="rounded-full border border-white/15 bg-white/12 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#dbeafe] sm:px-3 sm:text-xs sm:tracking-[0.16em]">
+                      Verified
+                    </span>
+                  </div>
+                  <p className="line-clamp-4 text-sm leading-6 text-white/88 sm:text-sm sm:leading-7">
+                    &ldquo;{testimonial.quote}&rdquo;
+                  </p>
+                </div>
+
+                <div className="mt-4 border-t border-white/15 pt-4 sm:mt-5">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white text-sm font-bold text-[#173574] sm:h-12 sm:w-12 sm:text-base">
+                      {testimonial.name
+                        .split(" ")
+                        .map((part) => part[0])
+                        .join("")}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="truncate text-sm font-bold text-white sm:text-base">{testimonial.name}</h3>
+                      <p className="mt-0.5 truncate text-xs text-white/62 sm:text-sm">{testimonial.location}</p>
+                      <p className="mt-1 truncate text-[10px] font-semibold uppercase tracking-[0.14em] text-[#bfdbfe] sm:text-xs sm:tracking-[0.16em]">
+                        {testimonial.vehicle}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))}
+            </div>
+          </div>
+
+          <div className="mt-1 flex justify-center gap-2">
+            {testimonials.map((testimonial) => (
+              <span
+                key={`testimonial-dot-${testimonial.name}`}
+                className="h-1.5 w-8 rounded-full bg-white/35"
+              />
             ))}
           </div>
         </div>

@@ -115,7 +115,7 @@ export async function VehicleListingSection({
     ...parsed,
     ...(isStockLookup ? {} : baseParams),
     page: parsed.page ?? 1,
-    perPage: 20,
+    perPage: 5,
   };
 
   const filterState = normalizeSidebarParams({
@@ -132,7 +132,7 @@ export async function VehicleListingSection({
     getVehicleSidebarData(facetScope, filterState),
   ]);
 
-  const totalPages = Math.max(1, Math.ceil(total / (merged.perPage ?? 20)));
+  const totalPages = Math.max(1, Math.ceil(total / (merged.perPage ?? 5)));
   const resetHref = buildVehicleSearchHref(normalizeSidebarParams({ ...baseParams }));
 
   const makeHref = (id: number) =>
