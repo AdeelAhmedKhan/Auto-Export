@@ -80,6 +80,15 @@ export async function HeroBanner({
             </div>
             <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
               <label className="text-xs font-medium sm:text-sm">
+                Stock ID
+                <input
+                  type="text"
+                  name="stock"
+                  className="mt-1 w-full rounded-lg border border-[#e0e0e0] px-2.5 py-2 text-sm"
+                  placeholder="e.g. st_11"
+                />
+              </label>
+              <label className="text-xs font-medium sm:text-sm">
                 Make
                 <select
                   name="make_id"

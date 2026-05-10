@@ -51,6 +51,15 @@ export function VehicleCard({ vehicle, compact = false }: Props) {
           compact ? "gap-1 p-1.5 sm:p-2" : "gap-1 p-1.5 sm:gap-1.5 sm:p-2.5"
         }`}
       >
+        {vehicle.stockNumber ? (
+          <p
+            className={`font-mono font-bold uppercase tracking-[0.12em] text-[#64748b] ${
+              compact ? "text-[0.52rem] sm:text-[0.58rem]" : "text-[0.58rem] sm:text-[0.66rem]"
+            }`}
+          >
+            Stock {vehicle.stockNumber}
+          </p>
+        ) : null}
         <Link href={`/car/${vehicle.id}`} className="min-w-0">
           <h3
             className={`block min-h-[1rem] overflow-hidden text-ellipsis whitespace-nowrap font-semibold uppercase leading-none text-[#0a0a0a] sm:line-clamp-2 sm:whitespace-normal sm:leading-[1.15] ${
