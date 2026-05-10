@@ -78,6 +78,15 @@ function normalizeSidebarParams(params: VehicleSearchParams): VehicleSearchParam
   };
 }
 
+function withoutStockLookup(params: VehicleSearchParams): VehicleSearchParams {
+  return {
+    ...params,
+    stockNumber: null,
+    page: 1,
+    perPage: undefined,
+  };
+}
+
 function SearchHiddenFields({
   params,
 }: {
@@ -122,14 +131,23 @@ export async function VehicleListingSection({
     ...merged,
     sort: merged.sort ?? null,
   });
-  const facetScope = normalizeSidebarParams({
-    ...merged,
-    sort: undefined,
-  });
+  const sidebarFilterState = isStockLookup ? withoutStockLookup(filterState) : filterState;
+  const facetScope = isStockLookup
+    ? withoutStockLookup({
+        ...merged,
+        sort: undefined,
+      })
+    : normalizeSidebarParams({
+        ...merged,
+        sort: undefined,
+      });
+  const sidebarContentScope = isStockLookup
+    ? normalizeSidebarParams({ ...baseParams, sort: merged.sort ?? null })
+    : filterState;
 
   const [{ rows, total }, sidebar] = await Promise.all([
     searchVehicles(merged),
-    getVehicleSidebarData(facetScope, filterState),
+    getVehicleSidebarData(facetScope, sidebarContentScope),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(total / (merged.perPage ?? 5)));
@@ -137,7 +155,7 @@ export async function VehicleListingSection({
 
   const makeHref = (id: number) =>
     buildVehicleSearchHref({
-      ...filterState,
+      ...sidebarFilterState,
       makeId: id,
       modelId: undefined,
       page: 1,
@@ -145,28 +163,28 @@ export async function VehicleListingSection({
 
   const bodyTypeHref = (id: number) =>
     buildVehicleSearchHref({
-      ...filterState,
+      ...sidebarFilterState,
       bodyTypeId: id,
       page: 1,
     });
 
   const fuelHref = (value: string) =>
     buildVehicleSearchHref({
-      ...filterState,
+      ...sidebarFilterState,
       fuel: value === "Unknown" ? undefined : value,
       page: 1,
     });
 
   const transmissionHref = (value: string) =>
     buildVehicleSearchHref({
-      ...filterState,
+      ...sidebarFilterState,
       transmission: value === "Unknown" ? undefined : value,
       page: 1,
     });
 
   const steeringHref = (value: string) =>
     buildVehicleSearchHref({
-      ...filterState,
+      ...sidebarFilterState,
       steering: value === "Unknown" ? undefined : value,
       page: 1,
     });
@@ -197,19 +215,19 @@ export async function VehicleListingSection({
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             <SidebarStatCard
-              href={buildVehicleSearchHref(filterState)}
+              href={buildVehicleSearchHref(sidebarFilterState)}
               label="Visible stock"
               value={sidebar.stats.total}
               active
             />
             <SidebarStatCard
-              href={buildVehicleSearchHref({ ...filterState, newArrival: true, page: 1 })}
+              href={buildVehicleSearchHref({ ...sidebarFilterState, newArrival: true, page: 1 })}
               label="New arrivals"
               value={sidebar.stats.newArrival}
               active={merged.newArrival}
             />
             <SidebarStatCard
-              href={buildVehicleSearchHref({ ...filterState, clearanceOnly: true, page: 1 })}
+              href={buildVehicleSearchHref({ ...sidebarFilterState, clearanceOnly: true, page: 1 })}
               label="Clearance"
               value={sidebar.stats.clearance}
               active={merged.clearanceOnly}
@@ -222,20 +240,20 @@ export async function VehicleListingSection({
         <InventorySidebar
           className="order-1 hidden xl:col-span-1 xl:block xl:sticky xl:top-24 xl:self-start"
           stats={[
-            { href: buildVehicleSearchHref(filterState), label: "All stock", value: sidebar.stats.total },
+            { href: buildVehicleSearchHref(sidebarFilterState), label: "All stock", value: sidebar.stats.total },
             {
-              href: buildVehicleSearchHref({ ...filterState, clearanceOnly: true, page: 1 }),
+              href: buildVehicleSearchHref({ ...sidebarFilterState, clearanceOnly: true, page: 1 }),
               label: "Clearance",
               value: sidebar.stats.clearance,
               active: merged.clearanceOnly,
             },
             {
-              href: buildVehicleSearchHref({ ...filterState, newArrival: true, page: 1 }),
+              href: buildVehicleSearchHref({ ...sidebarFilterState, newArrival: true, page: 1 }),
               label: "Fresh stock",
               value: sidebar.stats.newArrival,
               active: merged.newArrival,
             },
-            { href: buildVehicleSearchHref(filterState), label: "Featured", value: sidebar.stats.featured },
+            { href: buildVehicleSearchHref(sidebarFilterState), label: "Featured", value: sidebar.stats.featured },
           ]}
           resetHref={resetHref}
           makes={sidebar.makes}

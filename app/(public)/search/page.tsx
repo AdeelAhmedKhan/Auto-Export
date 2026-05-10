@@ -13,7 +13,7 @@ export default async function SearchPage({
   const stock = stockParam?.trim();
   if (stock) {
     const vehicle = await getVehicleByStockNumber(stock);
-    if (vehicle) redirect(`/car/${vehicle.id}#quote`);
+    if (vehicle) redirect(`/car/${vehicle.id}`);
   }
 
   return (

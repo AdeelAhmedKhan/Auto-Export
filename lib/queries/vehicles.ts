@@ -8,6 +8,7 @@ import {
   vehicleImages,
   vehicleFeatures,
 } from "@/lib/db/schema";
+import { normalizeStockNumberInput } from "@/lib/stock-number";
 import type { VehicleListItem } from "@/types";
 
 export type VehicleSearchParams = {
@@ -75,7 +76,7 @@ function buildVehicleConditions(params: VehicleSearchParams) {
 
   if (params.excludeId != null) conditions.push(ne(vehicles.id, params.excludeId));
   if (params.stockNumber?.trim()) {
-    conditions.push(ilike(vehicles.stockNumber, params.stockNumber.trim()));
+    conditions.push(ilike(vehicles.stockNumber, normalizeStockNumberInput(params.stockNumber)));
   }
   if (params.makeId != null) conditions.push(eq(vehicles.makeId, params.makeId));
   if (params.modelId != null) conditions.push(eq(vehicles.modelId, params.modelId));
@@ -378,11 +379,12 @@ export async function getVehicleByStockNumber(stockNumber: string) {
   if (!db) return null;
   const stock = stockNumber.trim();
   if (!stock) return null;
+  const normalizedStock = normalizeStockNumberInput(stock);
 
   const [row] = await db
     .select({ id: vehicles.id })
     .from(vehicles)
-    .where(and(ilike(vehicles.stockNumber, stock), eq(vehicles.isActive, true)))
+    .where(and(ilike(vehicles.stockNumber, normalizedStock), eq(vehicles.isActive, true)))
     .limit(1);
 
   return row ?? null;

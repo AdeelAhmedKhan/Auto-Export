@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { asc, desc, eq } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import { VehicleCreateForm } from "@/components/admin/VehicleCreateForm";
 import { createVehicleAction } from "./actions";
 import { db } from "@/lib/db";
 import { bodyTypes, makes, models, vehicles } from "@/lib/db/schema";
+import { formatStockNumber } from "@/lib/stock-number";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,7 @@ export default async function NewVehiclePage() {
   let makeOptions: { id: number; name: string }[] = [];
   let modelOptions: { id: number; name: string; makeId: number }[] = [];
   let bodyTypeOptions: { id: number; name: string }[] = [];
-  let nextStockNumber = "1";
+  let nextStockNumber = formatStockNumber(1);
 
   try {
     if (!db) throw new Error("no db");
@@ -32,18 +33,30 @@ export default async function NewVehiclePage() {
       .from(bodyTypes)
       .orderBy(asc(bodyTypes.name));
 
-    const [latestVehicle] = await db
-      .select({ id: vehicles.id })
+    const [latestStock] = await db
+      .select({
+        nextStockNumber: sql<string>`'st_' || (
+          coalesce(
+            max(
+              CASE
+                WHEN ${vehicles.stockNumber} ~ '^st_[0-9]+$'
+                THEN regexp_replace(${vehicles.stockNumber}, '^st_', '')::int
+                ELSE 0
+              END
+            ),
+            0
+          ) + 1
+        )::text`,
+      })
       .from(vehicles)
-      .orderBy(desc(vehicles.id))
       .limit(1);
 
-    nextStockNumber = String((latestVehicle?.id ?? 0) + 1);
+    nextStockNumber = latestStock?.nextStockNumber ?? formatStockNumber(1);
   } catch {
     makeOptions = [];
     modelOptions = [];
     bodyTypeOptions = [];
-    nextStockNumber = "1";
+    nextStockNumber = formatStockNumber(1);
   }
 
   if (makeOptions.length === 0 || modelOptions.length === 0 || bodyTypeOptions.length === 0) {

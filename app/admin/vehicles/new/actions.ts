@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import {
@@ -12,6 +12,7 @@ import {
   vehicleImages,
   vehicles,
 } from "@/lib/db/schema";
+import { formatStockNumber } from "@/lib/stock-number";
 import type { VehicleCreateState } from "@/components/admin/VehicleCreateForm";
 
 const schema = z.object({
@@ -217,10 +218,27 @@ export async function createVehicleAction(
         throw new Error("Vehicle could not be created.");
       }
 
+      const [latestStock] = await tx
+        .select({
+          nextStockNumber: sql<string>`'st_' || (
+            coalesce(
+              max(
+                CASE
+                  WHEN ${vehicles.stockNumber} ~ '^st_[0-9]+$'
+                  THEN regexp_replace(${vehicles.stockNumber}, '^st_', '')::int
+                  ELSE 0
+                END
+              ),
+              0
+            ) + 1
+          )::text`,
+        })
+        .from(vehicles);
+
       await tx
         .update(vehicles)
         .set({
-          stockNumber: String(newVehicleId),
+          stockNumber: latestStock?.nextStockNumber ?? formatStockNumber(newVehicleId),
           updatedAt: new Date(),
         })
         .where(eq(vehicles.id, newVehicleId));

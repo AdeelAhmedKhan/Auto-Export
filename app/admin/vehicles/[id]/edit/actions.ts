@@ -12,6 +12,7 @@ import {
   vehicleImages,
   vehicles,
 } from "@/lib/db/schema";
+import { normalizeStockNumberInput } from "@/lib/stock-number";
 import type { VehicleCreateState } from "@/components/admin/VehicleCreateForm";
 
 const schema = z.object({
@@ -155,6 +156,7 @@ export async function updateVehicleAction(
   }
 
   const data = parsed.data;
+  const stockNumber = normalizeStockNumberInput(data.stockNumber);
 
   const [existingVehicle] = await db
     .select({ id: vehicles.id })
@@ -186,15 +188,15 @@ export async function updateVehicleAction(
     return { error: "Selected body type was not found." };
   }
 
-  if (data.stockNumber) {
+  if (stockNumber) {
     const [existingStock] = await db
       .select({ id: vehicles.id })
       .from(vehicles)
-      .where(and(eq(vehicles.stockNumber, data.stockNumber), ne(vehicles.id, parsedId.data)))
+      .where(and(eq(vehicles.stockNumber, stockNumber), ne(vehicles.id, parsedId.data)))
       .limit(1);
 
     if (existingStock) {
-      return { error: `Stock number "${data.stockNumber}" already exists. Please use a unique stock number.` };
+      return { error: `Stock number "${stockNumber}" already exists. Please use a unique stock number.` };
     }
   }
 
@@ -212,7 +214,7 @@ export async function updateVehicleAction(
       await tx
         .update(vehicles)
         .set({
-          stockNumber: data.stockNumber || null,
+          stockNumber: stockNumber || null,
           location: data.location || null,
           makeId: data.makeId,
           modelId: data.modelId,
