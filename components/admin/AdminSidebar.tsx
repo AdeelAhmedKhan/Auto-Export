@@ -8,6 +8,7 @@ const links = [
   { href: "/admin/models", label: "Models" },
   { href: "/admin/body-types", label: "Body types" },
   { href: "/admin/announcements", label: "Announcements" },
+  { href: "/admin/testimonials", label: "Testimonials" },
   { href: "/admin/settings", label: "Settings" },
 ];
 

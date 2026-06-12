@@ -98,6 +98,18 @@ CREATE TABLE IF NOT EXISTS announcements (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS testimonials (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  location VARCHAR(255) NOT NULL,
+  vehicle VARCHAR(255) NOT NULL,
+  quote TEXT NOT NULL,
+  sort_order INT DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS admin_users (
   id SERIAL PRIMARY KEY,
   email VARCHAR(255) UNIQUE NOT NULL,

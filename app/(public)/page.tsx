@@ -11,6 +11,7 @@ import {
   listMakes,
   listBodyTypes,
 } from "@/lib/queries/makes";
+import { getHomepageTestimonials } from "@/lib/queries/testimonials";
 import { priceFilterLinks } from "@/lib/inventory-links";
 import Image from "next/image";
 
@@ -49,30 +50,6 @@ const aboutFeatures = [
         <circle cx="16" cy="17" r="1.5" />
       </svg>
     ),
-  },
-];
-
-const testimonials = [
-  {
-    name: "Ahmed Saleh",
-    location: "Suriname",
-    quote:
-      "The team handled my inquiry professionally from the first message. The vehicle details were clear, the inspection was honest, and shipment updates arrived on time.",
-    vehicle: "Ford Ranger Wildtrak",
-  },
-  {
-    name: "Grace Mwangi",
-    location: "Grenada",
-    quote:
-      "I appreciated how transparent the process felt. 9 Yard Trading helped me choose the right unit, explained the paperwork, and delivered exactly what was promised.",
-    vehicle: "Toyota Commuter",
-  },
-  {
-    name: "Marcus Johnson",
-    location: "Kenya",
-    quote:
-      "Professional service, fair pricing, and quick replies. The car arrived in very good condition and the export documents were prepared without delays.",
-    vehicle: "Toyota Hilux Standard Cab",
   },
 ];
 
@@ -137,6 +114,7 @@ export default async function HomePage({
 }: {
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
+  const testimonials = await getHomepageTestimonials();
   const stockPageParam = Array.isArray(searchParams?.stock_page)
     ? searchParams?.stock_page[0]
     : searchParams?.stock_page;

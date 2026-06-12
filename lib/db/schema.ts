@@ -114,6 +114,18 @@ export const announcements = pgTable("announcements", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
+export const testimonials = pgTable("testimonials", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  location: varchar("location", { length: 255 }).notNull(),
+  vehicle: varchar("vehicle", { length: 255 }).notNull(),
+  quote: text("quote").notNull(),
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
 export const adminUsers = pgTable("admin_users", {
   id: serial("id").primaryKey(),
   email: varchar("email", { length: 255 }).notNull().unique(),
