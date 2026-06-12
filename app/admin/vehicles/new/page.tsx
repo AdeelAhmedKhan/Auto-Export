@@ -5,6 +5,7 @@ import { createVehicleAction } from "./actions";
 import { db } from "@/lib/db";
 import { bodyTypes, makes, models, vehicles } from "@/lib/db/schema";
 import { formatStockNumber } from "@/lib/stock-number";
+import { ensureRequiredVehicleCatalog } from "@/lib/vehicle-catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,7 @@ export default async function NewVehiclePage() {
 
   try {
     if (!db) throw new Error("no db");
+    await ensureRequiredVehicleCatalog();
 
     makeOptions = await db
       .select({ id: makes.id, name: makes.name })

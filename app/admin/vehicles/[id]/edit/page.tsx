@@ -16,6 +16,7 @@ import {
   vehicles,
 } from "@/lib/db/schema";
 import { DeleteVehicleButton } from "../../DeleteVehicleButton";
+import { ensureRequiredVehicleCatalog } from "@/lib/vehicle-catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +37,8 @@ export default async function EditVehiclePage({ params }: { params: { id: string
   if (!Number.isInteger(vehicleId) || vehicleId <= 0) {
     notFound();
   }
+
+  await ensureRequiredVehicleCatalog();
 
   const [makeOptions, modelOptions, bodyTypeOptions, vehicleRow, imageRows, featureRows] =
     await Promise.all([

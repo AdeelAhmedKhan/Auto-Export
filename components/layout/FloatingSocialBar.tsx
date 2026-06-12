@@ -95,6 +95,16 @@ export function FloatingSocialBar({
         </svg>
       ),
     },
+    {
+      href: SITE_CONTACT.x,
+      label: "Open X / Twitter",
+      className: "bg-[#0f172a]",
+      icon: (
+        <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current md:h-5 md:w-5" aria-hidden="true">
+          <path d="M18.9 2H22l-7.6 8.68L24 22h-6.9l-5.4-7.06L4.1 22H1l8.1-9.25L0 2h7.1l4.9 6.48L18.9 2Zm-1.2 18h1.3L6.4 4H5.1l12.6 16Z" />
+        </svg>
+      ),
+    },
   ];
   const primaryMobileLinks = socialLinks.slice(0, 2);
   const dropdownMobileLinks = socialLinks.slice(2);

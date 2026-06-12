@@ -1,8 +1,9 @@
 export const SITE_CONTACT = {
   hours: "Mon - Fri : 09:00am to 06:00pm",
-  phone: "+66660202902",
+  phone: "+66 80 912 5232",
   email: "info@9yardtrading.com",
   whatsapp: "66660202902",
+  x: "https://x.com/9yardtrading",
   facebook:
     "https://www.facebook.com/people/9yard-Trading-Thailand/100086220451987/?rdid=hPaTYrYy4w8zBWAU&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F19KZMEgTEY%2F",
   instagram: "https://www.instagram.com/9yardtrading?igsh=MWRlcmFycmtvbG8xZg==",

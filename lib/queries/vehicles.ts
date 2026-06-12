@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, lte, sql, exists, ne, ilike } from "drizzle-orm";
+import { and, asc, desc, eq, gte, lte, sql, exists, ne, ilike, or } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   vehicles,
@@ -17,9 +17,13 @@ export type VehicleSearchParams = {
   makeId?: number | null;
   modelId?: number | null;
   bodyTypeId?: number | null;
+  makeText?: string | null;
+  bodyTypeText?: string | null;
   fuel?: string | null;
+  fuelText?: string | null;
   steering?: string | null;
   transmission?: string | null;
+  transmissionText?: string | null;
   minPrice?: number | null;
   maxPrice?: number | null;
   minYear?: number | null;
@@ -71,6 +75,21 @@ function orderByClause(sort: string | null | undefined) {
   }
 }
 
+function steeringAliases(value: string | null | undefined) {
+  const normalized = value?.trim().toLowerCase();
+  if (!normalized) return [];
+
+  if (["lhd", "left", "left hand drive", "left-hand drive"].includes(normalized)) {
+    return ["LHD", "Left", "Left Hand Drive", "Left-hand drive"];
+  }
+
+  if (["rhd", "right", "right hand drive", "right-hand drive"].includes(normalized)) {
+    return ["RHD", "Right", "Right Hand Drive", "Right-hand drive"];
+  }
+
+  return [value!.trim()];
+}
+
 function buildVehicleConditions(params: VehicleSearchParams) {
   const conditions = [eq(vehicles.isActive, true)];
 
@@ -79,11 +98,19 @@ function buildVehicleConditions(params: VehicleSearchParams) {
     conditions.push(ilike(vehicles.stockNumber, normalizeStockNumberInput(params.stockNumber)));
   }
   if (params.makeId != null) conditions.push(eq(vehicles.makeId, params.makeId));
+  if (params.makeText?.trim()) conditions.push(ilike(makes.name, `%${params.makeText.trim()}%`));
   if (params.modelId != null) conditions.push(eq(vehicles.modelId, params.modelId));
   if (params.bodyTypeId != null) conditions.push(eq(vehicles.bodyTypeId, params.bodyTypeId));
+  if (params.bodyTypeText?.trim()) conditions.push(ilike(bodyTypes.name, `%${params.bodyTypeText.trim()}%`));
   if (params.fuel) conditions.push(eq(vehicles.fuelType, params.fuel));
-  if (params.steering) conditions.push(eq(vehicles.steering, params.steering));
+  if (params.fuelText?.trim()) conditions.push(ilike(vehicles.fuelType, `%${params.fuelText.trim()}%`));
+  const steeringValues = steeringAliases(params.steering);
+  if (steeringValues.length) {
+    const steeringCondition = or(...steeringValues.map((value) => ilike(vehicles.steering, value)));
+    if (steeringCondition) conditions.push(steeringCondition);
+  }
   if (params.transmission) conditions.push(eq(vehicles.transmission, params.transmission));
+  if (params.transmissionText?.trim()) conditions.push(ilike(vehicles.transmission, `%${params.transmissionText.trim()}%`));
   if (params.minPrice != null) conditions.push(gte(vehicles.price, String(params.minPrice)));
   if (params.maxPrice != null) conditions.push(lte(vehicles.price, String(params.maxPrice)));
   if (params.minYear != null) conditions.push(gte(vehicles.year, params.minYear));

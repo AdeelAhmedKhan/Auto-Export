@@ -146,6 +146,11 @@ export function Footer({
                 <path d="M16.6 2c.37 2.5 1.78 4 4.4 4.16v3.05a7.62 7.62 0 0 1-4.34-1.32v6.55c0 4.03-2.52 6.56-6.23 6.56A6.25 6.25 0 0 1 4 14.75c0-3.53 2.88-6.33 6.65-6.17v3.18c-1.82-.25-3.37 1.07-3.37 2.99a2.98 2.98 0 0 0 3.02 3.08c1.8 0 3.02-1.12 3.02-3.34V2h3.28Z" />
               </svg>
             </SocialIcon>
+            <SocialIcon href={SITE_CONTACT.x} label="X / Twitter" className="bg-[#0f172a]">
+              <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden="true">
+                <path d="M18.9 2H22l-7.6 8.68L24 22h-6.9l-5.4-7.06L4.1 22H1l8.1-9.25L0 2h7.1l4.9 6.48L18.9 2Zm-1.2 18h1.3L6.4 4H5.1l12.6 16Z" />
+              </svg>
+            </SocialIcon>
           </div>
         </div>
       </div>

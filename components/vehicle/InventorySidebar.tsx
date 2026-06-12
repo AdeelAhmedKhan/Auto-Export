@@ -1,8 +1,19 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { normalizeSteeringFilter } from "@/lib/listing-params";
 import { priceFilterLinks, quickFilterLinks } from "@/lib/inventory-links";
 import type { SidebarFacetItem } from "@/lib/queries/vehicles";
+
+const pinnedQuickFilterLabels = new Set([
+  "Petrol",
+  "Diesel",
+  "Electric",
+  "LHD",
+  "RHD",
+  "Manual",
+  "Automatic",
+]);
 
 function BrandLogoMark({ label }: { label: string }) {
   const normalized = label.toLowerCase();
@@ -359,6 +370,36 @@ function SimpleLinkGrid({
   );
 }
 
+function facetHasValue(items: SidebarFacetItem[], value: string) {
+  const normalizedValue = value.trim().toLowerCase();
+  return items.some((item) => {
+    const candidates = [String(item.id), item.label].map((candidate) => candidate.trim().toLowerCase());
+    return candidates.includes(normalizedValue);
+  });
+}
+
+function quickFilterHasInventory(
+  href: string,
+  facets: {
+    fuelTypes: SidebarFacetItem[];
+    transmissions: SidebarFacetItem[];
+    steering: SidebarFacetItem[];
+  }
+) {
+  const params = new URLSearchParams(href.split("?")[1] ?? "");
+  const fuel = params.get("fuel");
+  const transmission = params.get("transmission");
+  const steering = normalizeSteeringFilter(params.get("steering"));
+
+  if (fuel) return facetHasValue(facets.fuelTypes, fuel);
+  if (transmission) return facetHasValue(facets.transmissions, transmission);
+  if (steering) {
+    return facets.steering.some((item) => normalizeSteeringFilter(String(item.id)) === steering);
+  }
+
+  return true;
+}
+
 type InventorySidebarProps = {
   stats?: Array<{ href: string; label: string; value: number; active?: boolean }>;
   resetHref?: string;
@@ -406,6 +447,11 @@ export function InventorySidebar({
   showSpecs = false,
   className,
 }: InventorySidebarProps) {
+  const visibleQuickFilterLinks = quickFilterLinks.filter((item) =>
+    pinnedQuickFilterLabels.has(item.label) ||
+    quickFilterHasInventory(item.href, { fuelTypes, transmissions, steering })
+  );
+
   return (
     <aside className={cn("space-y-6", className)}>
       {stats.length ? (
@@ -449,7 +495,7 @@ export function InventorySidebar({
       </SidebarPanel>
 
       <SidebarPanel title="Quick Filters" subtitle="Fast stock views">
-        <SimpleLinkGrid items={quickFilterLinks} activeHref={activeQuickHref} />
+        <SimpleLinkGrid items={visibleQuickFilterLinks} activeHref={activeQuickHref} />
       </SidebarPanel>
 
       {showSpecs && (fuelTypes.length || transmissions.length || steering.length) ? (

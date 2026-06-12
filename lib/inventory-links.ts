@@ -11,8 +11,8 @@ export const quickFilterLinks = [
   { label: "Petrol", href: "/search?fuel=Petrol" },
   { label: "Diesel", href: "/search?fuel=Diesel" },
   { label: "Electric", href: "/search?fuel=Electric" },
-  { label: "LHD", href: "/search?steering=Left" },
-  { label: "RHD", href: "/search?steering=Right" },
+  { label: "LHD", href: "/search?steering=LHD" },
+  { label: "RHD", href: "/search?steering=RHD" },
   { label: "Manual", href: "/search?transmission=Manual" },
   { label: "Automatic", href: "/search?transmission=Automatic" },
 ] as const;

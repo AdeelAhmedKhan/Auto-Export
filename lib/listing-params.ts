@@ -17,6 +17,21 @@ function dec(s: string | undefined): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+export function normalizeSteeringFilter(value: string | null | undefined): string | null {
+  const normalized = value?.trim().toLowerCase();
+  if (!normalized) return null;
+
+  if (["lhd", "left", "left hand drive", "left-hand drive"].includes(normalized)) {
+    return "LHD";
+  }
+
+  if (["rhd", "right", "right hand drive", "right-hand drive"].includes(normalized)) {
+    return "RHD";
+  }
+
+  return value?.trim() || null;
+}
+
 export function parseVehicleSearchParams(
   sp: Record<string, string | string[] | undefined>
 ): VehicleSearchParams {
@@ -30,9 +45,13 @@ export function parseVehicleSearchParams(
     makeId: num(first(sp.make_id)),
     modelId: num(first(sp.model_id)),
     bodyTypeId: num(first(sp.body_type)),
+    makeText: first(sp.make_text) ?? null,
+    bodyTypeText: first(sp.body_type_text) ?? null,
     fuel: first(sp.fuel) ?? null,
-    steering: first(sp.steering) ?? null,
+    fuelText: first(sp.fuel_text) ?? null,
+    steering: normalizeSteeringFilter(first(sp.steering)),
     transmission: first(sp.transmission) ?? null,
+    transmissionText: first(sp.transmission_text) ?? null,
     minPrice: dec(first(sp.min_price)),
     maxPrice: dec(first(sp.max_price)),
     minYear: num(first(sp.min_year)),
@@ -60,11 +79,15 @@ export function buildVehicleSearchQuery(params: VehicleSearchParams): string {
 
   if (params.stockNumber?.trim()) sp.set("stock", params.stockNumber.trim());
   if (params.makeId != null) sp.set("make_id", String(params.makeId));
+  if (params.makeText?.trim()) sp.set("make_text", params.makeText.trim());
   if (params.modelId != null) sp.set("model_id", String(params.modelId));
   if (params.bodyTypeId != null) sp.set("body_type", String(params.bodyTypeId));
+  if (params.bodyTypeText?.trim()) sp.set("body_type_text", params.bodyTypeText.trim());
   if (params.fuel) sp.set("fuel", params.fuel);
-  if (params.steering) sp.set("steering", params.steering);
+  if (params.fuelText?.trim()) sp.set("fuel_text", params.fuelText.trim());
+  if (params.steering) sp.set("steering", normalizeSteeringFilter(params.steering) ?? params.steering);
   if (params.transmission) sp.set("transmission", params.transmission);
+  if (params.transmissionText?.trim()) sp.set("transmission_text", params.transmissionText.trim());
   if (params.minPrice != null) sp.set("min_price", String(params.minPrice));
   if (params.maxPrice != null) sp.set("max_price", String(params.maxPrice));
   if (params.minYear != null) sp.set("min_year", String(params.minYear));

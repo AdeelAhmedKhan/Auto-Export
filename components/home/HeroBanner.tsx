@@ -90,60 +90,64 @@ export async function HeroBanner({
               </label>
               <label className="text-xs font-medium sm:text-sm">
                 Make
-                <select
-                  name="make_id"
+                <input
+                  type="text"
+                  name="make_text"
+                  list="make-options"
                   className="mt-1 w-full rounded-lg border border-[#e0e0e0] bg-white px-2.5 py-2 text-sm"
-                  defaultValue=""
-                >
-                  <option value="">Any</option>
+                  placeholder="Type or choose a make"
+                />
+                <datalist id="make-options">
                   {makes.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
+                    <option key={m.id} value={m.name} />
                   ))}
-                </select>
+                </datalist>
               </label>
               <label className="text-xs font-medium sm:text-sm">
                 Body type
-                <select
-                  name="body_type"
+                <input
+                  type="text"
+                  name="body_type_text"
+                  list="body-type-options"
                   className="mt-1 w-full rounded-lg border border-[#e0e0e0] bg-white px-2.5 py-2 text-sm"
-                  defaultValue=""
-                >
-                  <option value="">Any</option>
+                  placeholder="Type or choose a body type"
+                />
+                <datalist id="body-type-options">
                   {bodyTypes.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {b.name}
-                    </option>
+                    <option key={b.id} value={b.name} />
                   ))}
-                </select>
+                </datalist>
               </label>
               <label className="text-xs font-medium sm:text-sm">
                 Transmission
-                <select
-                  name="transmission"
+                <input
+                  type="text"
+                  name="transmission_text"
+                  list="transmission-options"
                   className="mt-1 w-full rounded-lg border border-[#e0e0e0] bg-white px-2.5 py-2 text-sm"
-                  defaultValue=""
-                >
-                  <option value="">Any</option>
-                  <option value="Automatic">Automatic</option>
-                  <option value="Manual">Manual</option>
-                  <option value="Automanual">Automanual</option>
-                </select>
+                  placeholder="Type or choose a transmission"
+                />
+                <datalist id="transmission-options">
+                  <option value="Automatic" />
+                  <option value="Manual" />
+                  <option value="Automanual" />
+                </datalist>
               </label>
               <label className="text-xs font-medium sm:text-sm">
                 Fuel
-                <select
-                  name="fuel"
+                <input
+                  type="text"
+                  name="fuel_text"
+                  list="fuel-options"
                   className="mt-1 w-full rounded-lg border border-[#e0e0e0] bg-white px-2.5 py-2 text-sm"
-                  defaultValue=""
-                >
-                  <option value="">Any</option>
-                  <option value="Petrol">Petrol</option>
-                  <option value="Diesel">Diesel</option>
-                  <option value="Electric">Electric</option>
-                  <option value="Hybrid">Hybrid</option>
-                </select>
+                  placeholder="Type or choose a fuel type"
+                />
+                <datalist id="fuel-options">
+                  <option value="Petrol" />
+                  <option value="Diesel" />
+                  <option value="Electric" />
+                  <option value="Hybrid" />
+                </datalist>
               </label>
               <label className="text-xs font-medium sm:text-sm">
                 Year from

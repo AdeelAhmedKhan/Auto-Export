@@ -9,9 +9,9 @@ export const metadata: Metadata = {
   title: "9 Yard Trading",
   description: "9 Yard Trading - search inventory, get a quote, and ship vehicles to your port.",
   icons: {
-    icon: "/logo.png",
-    shortcut: "/logo.png",
-    apple: "/logo.png",
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
   },
 };
 
