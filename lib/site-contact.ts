@@ -1,6 +1,9 @@
 export const SITE_CONTACT = {
   hours: "Mon - Fri : 09:00am to 06:00pm",
-  phone: "+66 80 912 5232",
+  phone: "+66 66 020 2902",
+  secondaryPhone: "+66 80 912 5232",
+  phoneNumbers: ["+66 66 020 2902", "+66 80 912 5232"],
+  phoneDisplay: "+66 66 020 2902   +66 80 912 5232",
   email: "info@9yardtrading.com",
   whatsapp: "66660202902",
   x: "https://x.com/9yardtrading",
@@ -11,3 +14,8 @@ export const SITE_CONTACT = {
   address:
     "193, Soi Samrong Nuea 21, Samrong Nuea sub-district, Mueang Samut Prakan district, Samut Prakan, 10270",
 } as const;
+
+export function phoneHref(phone: string = SITE_CONTACT.phone) {
+  const primaryPhone = phone.split("/")[0]?.trim() || SITE_CONTACT.phone;
+  return `tel:${primaryPhone.replace(/[^\d+]/g, "")}`;
+}

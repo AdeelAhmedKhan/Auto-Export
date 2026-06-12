@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { priceFilterLinks, quickFilterLinks } from "@/lib/inventory-links";
 import type { SidebarFacetItem } from "@/lib/queries/vehicles";
-import { SITE_CONTACT } from "@/lib/site-contact";
+import { SITE_CONTACT, phoneHref } from "@/lib/site-contact";
 
 type Props = {
   companyName?: string;
@@ -42,10 +42,12 @@ export function Footer({
   companyName = "9 Yard Trading",
   address,
   email = SITE_CONTACT.email,
-  phone = SITE_CONTACT.phone,
   topMakes = [],
   bodyTypes = [],
 }: Props) {
+  const primaryPhone = SITE_CONTACT.phone;
+  const secondaryPhone = SITE_CONTACT.secondaryPhone;
+
   return (
     <footer className="border-t border-[#e0e0e0] bg-[#f5f5f5]">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-5">
@@ -64,8 +66,11 @@ export function Footer({
           </div>
           {address ? <p className="text-sm text-[#6b7280]">{address}</p> : null}
           <p className="mt-2 text-sm">
-            <a href={`tel:${phone}`} className="text-[#0c47a5] hover:underline">
-              {phone}
+            <a href={phoneHref(primaryPhone)} className="block text-[#0c47a5] hover:underline">
+              {primaryPhone}
+            </a>
+            <a href={phoneHref(secondaryPhone)} className="block text-[#0c47a5] hover:underline">
+              {secondaryPhone}
             </a>
           </p>
           <p className="text-sm">

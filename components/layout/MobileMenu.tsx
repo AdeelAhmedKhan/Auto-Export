@@ -6,6 +6,7 @@ import { useState } from "react";
 import { priceFilterLinks, quickFilterLinks } from "@/lib/inventory-links";
 import { buildVehicleSearchHref } from "@/lib/listing-params";
 import type { SidebarFacetItem } from "@/lib/queries/vehicles";
+import { SITE_CONTACT, phoneHref } from "@/lib/site-contact";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -21,7 +22,6 @@ type Props = {
 
 export function MobileMenu({
   companyName,
-  phone,
   whatsapp,
   topMakes = [],
   bodyTypes = [],
@@ -30,6 +30,8 @@ export function MobileMenu({
   steering = [],
 }: Props) {
   const [open, setOpen] = useState(false);
+  const primaryPhone = SITE_CONTACT.phone;
+  const secondaryPhone = SITE_CONTACT.secondaryPhone;
 
   return (
     <div className="lg:hidden">
@@ -268,12 +270,14 @@ export function MobileMenu({
             ))}
           </div>
 
-          <a
-            href={`tel:${phone.replace(/\s/g, "")}`}
-            className="mt-4 rounded-lg bg-[#e6d53c] px-3 py-3 text-center font-semibold text-black"
-          >
-            {phone}
-          </a>
+          <div className="mt-4 rounded-lg bg-[#e6d53c] px-3 py-3 text-center font-semibold text-black">
+            <a href={phoneHref(primaryPhone)} className="block hover:underline">
+              {primaryPhone}
+            </a>
+            <a href={phoneHref(secondaryPhone)} className="block hover:underline">
+              {secondaryPhone}
+            </a>
+          </div>
           <a
             href={`https://wa.me/${whatsapp.replace(/\D/g, "")}`}
             target="_blank"

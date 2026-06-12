@@ -6,7 +6,7 @@ import { useRef, useState } from "react";
 import { MobileMenu } from "./MobileMenu";
 import { priceFilterLinks, quickFilterLinks } from "@/lib/inventory-links";
 import type { SidebarFacetItem } from "@/lib/queries/vehicles";
-import { SITE_CONTACT } from "@/lib/site-contact";
+import { SITE_CONTACT, phoneHref } from "@/lib/site-contact";
 import { cn } from "@/lib/utils";
 
 type NavbarProps = {
@@ -22,7 +22,7 @@ type NavbarProps = {
 
 export function Navbar({
   companyName = "9 Yard Trading",
-  phone = SITE_CONTACT.phone,
+  phone = SITE_CONTACT.phoneDisplay,
   whatsapp = SITE_CONTACT.whatsapp,
   topMakes = [],
   bodyTypes = [],
@@ -31,6 +31,8 @@ export function Navbar({
   steering = [],
 }: NavbarProps) {
   const [open, setOpen] = useState<string | null>(null);
+  const primaryPhone = SITE_CONTACT.phone;
+  const secondaryPhone = SITE_CONTACT.secondaryPhone;
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const openMenu = (key: string) => {
     if (closeTimer.current) {
@@ -168,7 +170,14 @@ export function Navbar({
               Search
             </button>
           </form>
-          <span className="text-sm opacity-90">{phone}</span>
+          <span className="text-sm opacity-90">
+            <a href={phoneHref(primaryPhone)} className="block hover:underline">
+              {primaryPhone}
+            </a>
+            <a href={phoneHref(secondaryPhone)} className="block hover:underline">
+              {secondaryPhone}
+            </a>
+          </span>
         </div>
 
         <MobileMenu

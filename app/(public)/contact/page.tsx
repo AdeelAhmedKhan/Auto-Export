@@ -1,5 +1,5 @@
 import { getSiteSettings } from "@/lib/queries/site";
-import { SITE_CONTACT } from "@/lib/site-contact";
+import { SITE_CONTACT, phoneHref } from "@/lib/site-contact";
 
 export const dynamic = "force-dynamic";
 
@@ -11,9 +11,10 @@ export default async function ContactPage() {
     s = {};
   }
 
-  const phone = SITE_CONTACT.phone;
-  const email = SITE_CONTACT.email;
-  const whatsapp = SITE_CONTACT.whatsapp;
+  const primaryPhone = SITE_CONTACT.phone;
+  const secondaryPhone = SITE_CONTACT.secondaryPhone;
+  const email = s.email ?? SITE_CONTACT.email;
+  const whatsapp = s.whatsapp ?? SITE_CONTACT.whatsapp;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-14">
@@ -27,9 +28,14 @@ export default async function ContactPage() {
       <ul className="mt-10 space-y-4 text-lg">
         <li>
           Phone:{" "}
-          <a href={`tel:${phone}`} className="font-semibold text-[#0c47a5] hover:underline">
-            {phone}
-          </a>
+          <span className="inline-block align-top">
+            <a href={phoneHref(primaryPhone)} className="block font-semibold text-[#0c47a5] hover:underline">
+              {primaryPhone}
+            </a>
+            <a href={phoneHref(secondaryPhone)} className="block font-semibold text-[#0c47a5] hover:underline">
+              {secondaryPhone}
+            </a>
+          </span>
         </li>
         <li>
           Email:{" "}

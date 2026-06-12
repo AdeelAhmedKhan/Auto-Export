@@ -49,7 +49,7 @@ export default async function PublicLayout({
   const companyName = settings.company_name ?? "9 Yard Trading";
   const address = settings.address ?? SITE_CONTACT.address;
   const email = SITE_CONTACT.email;
-  const phone = SITE_CONTACT.phone;
+  const phone = SITE_CONTACT.phoneDisplay;
   const whatsapp = SITE_CONTACT.whatsapp;
 
   return (

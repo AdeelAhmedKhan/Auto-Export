@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SITE_CONTACT } from "@/lib/site-contact";
+import { SITE_CONTACT, phoneHref } from "@/lib/site-contact";
 
 type TopBarProps = {
   hours?: string;
@@ -32,11 +32,12 @@ function formatThailandTime(date: Date) {
 
 export function TopBar({
   hours = SITE_CONTACT.hours,
-  phone = SITE_CONTACT.phone,
   email = SITE_CONTACT.email,
 }: TopBarProps) {
   const [thaiTime, setThaiTime] = useState(() => formatThailandTime(new Date()));
   const [mounted, setMounted] = useState(false);
+  const primaryPhone = SITE_CONTACT.phone;
+  const secondaryPhone = SITE_CONTACT.secondaryPhone;
 
   useEffect(() => {
     setMounted(true);
@@ -67,9 +68,14 @@ export function TopBar({
           <span className="text-white/85">{hours}</span>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
-          <a href={`tel:${phone}`} className="font-medium text-[#e6d53c] hover:underline">
-            {phone}
-          </a>
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1">
+            <a href={phoneHref(primaryPhone)} className="font-medium text-[#e6d53c] hover:underline">
+              {primaryPhone}
+            </a>
+            <a href={phoneHref(secondaryPhone)} className="font-medium text-[#e6d53c] hover:underline">
+              {secondaryPhone}
+            </a>
+          </div>
           <a href={`mailto:${email}`} className="font-medium text-[#e6d53c] hover:underline">
             {email}
           </a>
