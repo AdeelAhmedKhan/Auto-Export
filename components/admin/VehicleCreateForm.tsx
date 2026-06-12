@@ -80,6 +80,10 @@ function formatBytes(bytes?: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function namesMatch(a: string, b: string) {
+  return a.trim().toLowerCase() === b.trim().toLowerCase();
+}
+
 export function VehicleCreateForm({
   action,
   makes,
@@ -95,15 +99,21 @@ export function VehicleCreateForm({
   initialValues?: VehicleFormInitialValues;
   mode?: "create" | "edit";
 }) {
-  const initialMakeId = String(initialValues?.makeId ?? makes[0]?.id ?? "");
-  const initialModelId = String(
-    initialValues?.modelId ??
-      models.find((model) => model.makeId === Number(initialMakeId))?.id ??
-      ""
-  );
+  const initialMake = makes.find((make) => make.id === initialValues?.makeId) ?? makes[0];
+  const initialMakeId = String(initialMake?.id ?? "");
+  const initialModel =
+    models.find((model) => model.id === initialValues?.modelId) ??
+    models.find((model) => model.makeId === Number(initialMakeId));
+  const initialModelId = String(initialModel?.id ?? "");
+  const initialBodyType =
+    bodyTypes.find((bodyType) => bodyType.id === initialValues?.bodyTypeId) ?? bodyTypes[0];
   const [state, formAction] = useFormState(action, initialState);
   const [selectedMakeId, setSelectedMakeId] = useState<string>(initialMakeId);
+  const [selectedMakeName, setSelectedMakeName] = useState<string>(initialMake?.name ?? "");
   const [selectedModelId, setSelectedModelId] = useState<string>(initialModelId);
+  const [selectedModelName, setSelectedModelName] = useState<string>(initialModel?.name ?? "");
+  const [selectedBodyTypeId, setSelectedBodyTypeId] = useState<string>(String(initialBodyType?.id ?? ""));
+  const [selectedBodyTypeName, setSelectedBodyTypeName] = useState<string>(initialBodyType?.name ?? "");
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>(initialValues?.images ?? []);
   const [primaryImageIndex, setPrimaryImageIndex] = useState(() => {
     const foundIndex = (initialValues?.images ?? []).findIndex((image) => image.isPrimary);
@@ -114,21 +124,9 @@ export function VehicleCreateForm({
 
   const filteredModels = useMemo(() => {
     const makeId = Number(selectedMakeId);
-    if (!makeId) return [] as Option[];
+    if (!makeId) return models;
     return models.filter((model) => model.makeId === makeId);
   }, [models, selectedMakeId]);
-
-  useEffect(() => {
-    if (filteredModels.length === 0) {
-      setSelectedModelId("");
-      return;
-    }
-
-    const found = filteredModels.some((model) => String(model.id) === selectedModelId);
-    if (!found) {
-      setSelectedModelId(String(filteredModels[0].id));
-    }
-  }, [filteredModels, selectedModelId]);
 
   useEffect(() => {
     if (uploadedImages.length === 0) {
@@ -200,10 +198,46 @@ export function VehicleCreateForm({
     setUploadedImages((current) => current.filter((_, index) => index !== indexToRemove));
   }
 
+  function handleMakeNameChange(value: string) {
+    setSelectedMakeName(value);
+    const match = makes.find((make) => namesMatch(make.name, value));
+
+    if (!match) {
+      setSelectedMakeId("");
+      setSelectedModelId("");
+      return;
+    }
+
+    setSelectedMakeId(String(match.id));
+    const modelStillValid = models.some(
+      (model) => String(model.id) === selectedModelId && model.makeId === match.id
+    );
+
+    if (!modelStillValid) {
+      setSelectedModelId("");
+      setSelectedModelName("");
+    }
+  }
+
+  function handleModelNameChange(value: string) {
+    setSelectedModelName(value);
+    const match = filteredModels.find((model) => namesMatch(model.name, value));
+    setSelectedModelId(match ? String(match.id) : "");
+  }
+
+  function handleBodyTypeNameChange(value: string) {
+    setSelectedBodyTypeName(value);
+    const match = bodyTypes.find((bodyType) => namesMatch(bodyType.name, value));
+    setSelectedBodyTypeId(match ? String(match.id) : "");
+  }
+
   return (
     <form action={formAction} className="mt-8 space-y-8">
       <input type="hidden" name="primaryImageUrl" value={primaryImageUrl} />
       <input type="hidden" name="additionalImageUrls" value={additionalImageUrls} />
+      <input type="hidden" name="makeId" value={selectedMakeId} />
+      <input type="hidden" name="modelId" value={selectedModelId} />
+      <input type="hidden" name="bodyTypeId" value={selectedBodyTypeId} />
 
       {state.error || uploadError ? (
         <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -248,47 +282,54 @@ export function VehicleCreateForm({
           </label>
           <label className="text-sm font-medium text-[#374151]">
             Make *
-            <select
-              name="makeId"
-              value={selectedMakeId}
-              onChange={(e) => setSelectedMakeId(e.target.value)}
+            <input
+              name="makeName"
+              list="vehicle-make-options"
+              required
+              value={selectedMakeName}
+              onChange={(e) => handleMakeNameChange(e.target.value)}
               className="mt-1 w-full rounded-lg border border-[#dbe3f2] px-3 py-2.5"
-            >
+              placeholder="Choose or type a make"
+            />
+            <datalist id="vehicle-make-options">
               {makes.map((make) => (
-                <option key={make.id} value={make.id}>
-                  {make.name}
-                </option>
+                <option key={make.id} value={make.name} />
               ))}
-            </select>
+            </datalist>
           </label>
           <label className="text-sm font-medium text-[#374151]">
             Model *
-            <select
-              name="modelId"
-              value={selectedModelId}
-              onChange={(e) => setSelectedModelId(e.target.value)}
+            <input
+              name="modelName"
+              list="vehicle-model-options"
+              required
+              value={selectedModelName}
+              onChange={(e) => handleModelNameChange(e.target.value)}
               className="mt-1 w-full rounded-lg border border-[#dbe3f2] px-3 py-2.5"
-            >
+              placeholder="Choose or type a model"
+            />
+            <datalist id="vehicle-model-options">
               {filteredModels.map((model) => (
-                <option key={model.id} value={model.id}>
-                  {model.name}
-                </option>
+                <option key={model.id} value={model.name} />
               ))}
-            </select>
+            </datalist>
           </label>
           <label className="text-sm font-medium text-[#374151]">
             Body type *
-            <select
-              name="bodyTypeId"
-              defaultValue={String(initialValues?.bodyTypeId ?? bodyTypes[0]?.id ?? "")}
+            <input
+              name="bodyTypeName"
+              list="vehicle-body-type-options"
+              required
+              value={selectedBodyTypeName}
+              onChange={(e) => handleBodyTypeNameChange(e.target.value)}
               className="mt-1 w-full rounded-lg border border-[#dbe3f2] px-3 py-2.5"
-            >
+              placeholder="Choose or type a body type"
+            />
+            <datalist id="vehicle-body-type-options">
               {bodyTypes.map((bodyType) => (
-                <option key={bodyType.id} value={bodyType.id}>
-                  {bodyType.name}
-                </option>
+                <option key={bodyType.id} value={bodyType.name} />
               ))}
-            </select>
+            </datalist>
           </label>
           <label className="text-sm font-medium text-[#374151]">
             Registration year *

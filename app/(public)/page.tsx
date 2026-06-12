@@ -55,21 +55,21 @@ const aboutFeatures = [
 const testimonials = [
   {
     name: "Ahmed Saleh",
-    location: "Grenada, Kenya",
+    location: "Suriname",
     quote:
       "The team handled my inquiry professionally from the first message. The vehicle details were clear, the inspection was honest, and shipment updates arrived on time.",
     vehicle: "Ford Ranger Wildtrak",
   },
   {
     name: "Grace Mwangi",
-    location: "Grenada, Kenya",
+    location: "Grenada",
     quote:
       "I appreciated how transparent the process felt. 9 Yard Trading helped me choose the right unit, explained the paperwork, and delivered exactly what was promised.",
     vehicle: "Toyota Commuter",
   },
   {
     name: "Marcus Johnson",
-    location: "Grenada, Kenya",
+    location: "Kenya",
     quote:
       "Professional service, fair pricing, and quick replies. The car arrived in very good condition and the export documents were prepared without delays.",
     vehicle: "Toyota Hilux Standard Cab",

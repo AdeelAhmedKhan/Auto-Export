@@ -6,22 +6,24 @@ import { and, eq, ne } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import {
-  bodyTypes,
-  models,
   vehicleFeatures,
   vehicleImages,
   vehicles,
 } from "@/lib/db/schema";
 import { normalizeStockNumberInput } from "@/lib/stock-number";
+import { resolveVehicleOptionIds } from "@/lib/admin-vehicle-options";
 import type { VehicleCreateState } from "@/components/admin/VehicleCreateForm";
 
 const schema = z.object({
   stockNumber: z.string().trim().max(50).optional(),
   location: z.string().trim().max(100).optional(),
   title: z.string().trim().min(3).max(255),
-  makeId: z.coerce.number().int().positive(),
-  modelId: z.coerce.number().int().positive(),
-  bodyTypeId: z.coerce.number().int().positive(),
+  makeId: z.string().trim().optional(),
+  makeName: z.string().trim().min(1).max(100),
+  modelId: z.string().trim().optional(),
+  modelName: z.string().trim().min(1).max(100),
+  bodyTypeId: z.string().trim().optional(),
+  bodyTypeName: z.string().trim().min(1).max(100),
   year: z.coerce.number().int().min(1990).max(2035),
   month: z.union([z.literal(""), z.coerce.number().int().min(1).max(12)]).optional(),
   manufactureYear: z.union([z.literal(""), z.coerce.number().int().min(1900).max(2035)]).optional(),
@@ -115,9 +117,12 @@ export async function updateVehicleAction(
     stockNumber: getString(formData, "stockNumber"),
     location: getString(formData, "location"),
     title: getString(formData, "title"),
-    makeId: formData.get("makeId"),
-    modelId: formData.get("modelId"),
-    bodyTypeId: formData.get("bodyTypeId"),
+    makeId: getString(formData, "makeId"),
+    makeName: getString(formData, "makeName"),
+    modelId: getString(formData, "modelId"),
+    modelName: getString(formData, "modelName"),
+    bodyTypeId: getString(formData, "bodyTypeId"),
+    bodyTypeName: getString(formData, "bodyTypeName"),
     year: formData.get("year"),
     month: getString(formData, "month"),
     manufactureYear: getString(formData, "manufactureYear"),
@@ -168,24 +173,17 @@ export async function updateVehicleAction(
     return { error: "Vehicle was not found." };
   }
 
-  const [modelRow] = await db
-    .select({ id: models.id })
-    .from(models)
-    .where(and(eq(models.id, data.modelId), eq(models.makeId, data.makeId)))
-    .limit(1);
+  const optionIds = await resolveVehicleOptionIds({
+    makeId: data.makeId,
+    makeName: data.makeName,
+    modelId: data.modelId,
+    modelName: data.modelName,
+    bodyTypeId: data.bodyTypeId,
+    bodyTypeName: data.bodyTypeName,
+  });
 
-  if (!modelRow) {
-    return { error: "Selected model does not belong to the chosen make." };
-  }
-
-  const [bodyTypeRow] = await db
-    .select({ id: bodyTypes.id })
-    .from(bodyTypes)
-    .where(eq(bodyTypes.id, data.bodyTypeId))
-    .limit(1);
-
-  if (!bodyTypeRow) {
-    return { error: "Selected body type was not found." };
+  if (!optionIds) {
+    return { error: "Please provide a make, model, and body type." };
   }
 
   if (stockNumber) {
@@ -216,9 +214,9 @@ export async function updateVehicleAction(
         .set({
           stockNumber: stockNumber || null,
           location: data.location || null,
-          makeId: data.makeId,
-          modelId: data.modelId,
-          bodyTypeId: data.bodyTypeId,
+          makeId: optionIds.makeId,
+          modelId: optionIds.modelId,
+          bodyTypeId: optionIds.bodyTypeId,
           title: data.title,
           year: data.year,
           month: typeof data.month === "number" ? data.month : null,
